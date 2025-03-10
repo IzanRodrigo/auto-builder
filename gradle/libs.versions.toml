@@ -1,0 +1,16 @@
+[versions]
+androidX-annotations = "1.9.1"
+kotlin = "2.0.21"
+kotlinpoet = "2.1.0"
+ksp = "2.0.21-1.0.25"
+
+[plugins]
+google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
+[libraries]
+androidX-annotations = { module = "androidx.annotation:annotation", version.ref = "androidX-annotations" }
+google-ksp-processor-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+kotlinpoet-lib = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
+
