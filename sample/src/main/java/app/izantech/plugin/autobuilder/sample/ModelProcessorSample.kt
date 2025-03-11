@@ -67,7 +67,26 @@ interface ModelWithDefaults {
     val complexObjectWithDefault: ComplexObject
 }
 
+@AutoBuilder
+interface EqualityModel {
+    val a: String
+    val b: Int
+}
+
 fun main() {
+    val eq1 = EqualityModel {
+        a = "Test"
+        b = 42
+    }
+    val eq2 = EqualityModel {
+        b = 42
+        a = "Test"
+    }
+    println(eq1)
+    println(eq2)
+    println("eq1 == eq2: ${eq1 == eq2}")
+    println()
+
     val modelWithDefaults = ModelWithDefaults()
     val model = FullModel {
         string = "Hello, World!"

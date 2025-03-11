@@ -25,6 +25,7 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.LambdaTypeName
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
@@ -176,6 +177,7 @@ class ModelGenerator(
         className: ClassName,
         implClassName: ClassName,
     ): TypeSpec {
+        val builderClassName = ClassName(className.packageName, "${className.simpleName}Builder")
         val builderProperties = generateBuilderProperties(properties)
         val constructorParameters = builderProperties.prettyPrint { builderProperty ->
             // Edge case:
@@ -189,7 +191,7 @@ class ModelGenerator(
                 "${builderProperty.name} = ${builderProperty.name},"
             }
         }
-        return TypeSpec.classBuilder("${className.simpleName}Builder")
+        return TypeSpec.classBuilder(builderClassName)
             .primaryConstructor(
                 FunSpec.constructorBuilder()
                     .addModifiers(KModifier.INTERNAL)
@@ -202,6 +204,7 @@ class ModelGenerator(
                     .build()
             )
             .addProperties(builderProperties)
+            .addFunctions(generateBuilderJavaMethods(builderClassName, properties))
             .addFunction(
                 FunSpec.builder("build")
                     .returns(className)
@@ -234,6 +237,16 @@ class ModelGenerator(
             }
             .setter(FunSpec.setterBuilder().addAnnotation(JvmSynthetic::class).build())
             .addAnnotations(property.kAnnotations)
+            .build()
+    }
+
+    private fun generateBuilderJavaMethods(builderClassName: ClassName, properties: ModelProperties) = properties.map { property ->
+        val name = property.simpleName.asString()
+        val type = property.type.toTypeName()
+        FunSpec.builder(name)
+            .addParameter(name, type)
+            .addStatement("return %M { this.$name = $name }", MemberName("kotlin", "apply"))
+            .returns(builderClassName)
             .build()
     }
 
