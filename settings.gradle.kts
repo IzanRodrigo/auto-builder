@@ -23,7 +23,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "android-model-gen"
+rootProject.name = "auto-builder"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("GROOVY_COMPILATION_AVOIDANCE")

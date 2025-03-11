@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Sample Kotlin" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="app.izantech.plugin.autobuilder.sample.ModelProcessorSampleKt" />
+    <module name="auto-builder.sample.main" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean" externalProjectPath="$PROJECT_DIR$/sample" vmOptions="" scriptParameters="" />
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
