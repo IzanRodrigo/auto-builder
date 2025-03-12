@@ -1,3 +1,9 @@
+@file:Suppress("UnstableApiUsage")
+
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.MavenPublishPlugin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -5,11 +11,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.maven.publish) apply false
 }
 
 allprojects {
+    // Configure the JVM target version
     val javaVersion = "17"
-
     tasks.withType<KotlinCompile> {
         compilerOptions {
             suppressWarnings = true
@@ -22,9 +29,21 @@ allprojects {
             )
         }
     }
-
     tasks.withType<JavaCompile> {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
+    }
+}
+
+subprojects {
+    group = requireNotNull(project.findProperty("GROUP"))
+    version = requireNotNull(project.findProperty("VERSION_NAME"))
+
+    // Configure the Maven publishing
+    plugins.withType<MavenPublishPlugin> {
+        configure<MavenPublishBaseExtension> {
+            coordinates(group.toString(), "autobuilder-${project.name}", version.toString())
+            configure(KotlinJvm(JavadocJar.None(), sourcesJar = true))
+        }
     }
 }

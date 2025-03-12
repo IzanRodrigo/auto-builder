@@ -3,10 +3,12 @@ androidX-annotations = "1.9.1"
 kotlin = "2.0.21"
 kotlinpoet = "2.1.0"
 ksp = "2.0.21-1.0.25"
+maven-publish = "0.31.0"
 
 [plugins]
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 
 [libraries]
 androidX-annotations = { module = "androidx.annotation:annotation", version.ref = "androidX-annotations" }
