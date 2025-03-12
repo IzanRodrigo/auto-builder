@@ -6,7 +6,6 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -18,9 +17,13 @@ internal fun FileSpec.Builder.suppressWarningTypes(vararg types: String): FileSp
         return this
     }
 
-    val format = "%S,".repeat(types.count()).trimEnd(',')
+    val format = types.joinToString(
+        prefix = "\n",
+        separator = "",
+        transform = { "\t%S,\n" },
+    )
     return addAnnotation(
-        AnnotationSpec.builder(ClassName("", "Suppress"))
+        AnnotationSpec.builder(Suppress::class)
             .addMember(format, *types)
             .build()
     )
@@ -31,6 +34,15 @@ internal fun TypeSpec.Builder.addOptionalOriginatingKSFile(file: KSFile?) =
 
 internal fun FunSpec.Builder.addOptionalOriginatingKSFile(file: KSFile?) =
     file?.let(::addOriginatingKSFile) ?: this
+
+internal fun FunSpec.Builder.hideFromKotlin(): FunSpec.Builder {
+    // Hide the method from Kotlin code.
+    // This workaround is needed because there's no @JavaOnly annotation available:
+    // https://youtrack.jetbrains.com/issue/KT-36439
+    return addAnnotation(AnnotationSpec.builder(SinceKotlin::class)
+        .addMember("%S", "99999999.9")
+        .build())
+}
 
 internal val KSClassDeclaration.kAnnotations
     get() = annotations.toKAnnotations()

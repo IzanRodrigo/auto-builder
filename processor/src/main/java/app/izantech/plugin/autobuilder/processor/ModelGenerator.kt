@@ -3,8 +3,10 @@ package app.izantech.plugin.autobuilder.processor
 import app.izantech.plugin.autobuilder.processor.util.addOptionalOriginatingKSFile
 import app.izantech.plugin.autobuilder.processor.util.autoBuilderAnnotation
 import app.izantech.plugin.autobuilder.processor.util.autoBuilderPropertyAnnotation
+import app.izantech.plugin.autobuilder.processor.util.capitalizeCompat
 import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
 import app.izantech.plugin.autobuilder.processor.util.getProperties
+import app.izantech.plugin.autobuilder.processor.util.hideFromKotlin
 import app.izantech.plugin.autobuilder.processor.util.isArray
 import app.izantech.plugin.autobuilder.processor.util.isCharSequence
 import app.izantech.plugin.autobuilder.processor.util.isString
@@ -55,12 +57,37 @@ class ModelGenerator(
         val builderClassName = ClassName(packageName, "${symbolName}Builder")
 
         FileSpec.builder(packageName, "${symbolName}.builder")
-            .suppressWarningTypes("RedundantVisibilityModifier", "MemberVisibilityCanBePrivate")
-            .addType(generateImplementation(originatingFile, properties, annotations, className, implClassName))
-            .addType(generateBuilder(originatingFile, properties, className, implClassName))
-            .addFunctions(generateModelExtensions(originatingFile, className, builderClassName))
+            .suppressWarningTypes(
+                "RedundantVisibilityModifier",
+                "MemberVisibilityCanBePrivate",
+                "NEWER_VERSION_IN_SINCE_KOTLIN",
+            )
+            .addType(
+                generateImplementation(
+                    originatingFile = originatingFile,
+                    properties = properties,
+                    annotations = annotations,
+                    className = className,
+                    implClassName = implClassName,
+                )
+            )
+            .addType(
+                generateBuilder(
+                    originatingFile = originatingFile,
+                    properties = properties,
+                    className = className,
+                    implClassName = implClassName,
+                )
+            )
+            .addFunctions(
+                generateModelExtensions(
+                    originatingFile = originatingFile,
+                    className = className,
+                    builderClassName = builderClassName,
+                )
+            )
             .build()
-            .writeTo(codeGenerator, Dependencies(true))
+            .writeTo(codeGenerator, Dependencies(aggregating = true))
     }
 
     // region ModelImpl
@@ -77,7 +104,7 @@ class ModelGenerator(
             .addSuperinterface(className)
             .primaryConstructor(generateImplementationPrimaryConstructor(properties))
             .addProperties(generateImplementationProperties(properties))
-            .addFunction(generateImplementationEquals(properties, className))
+            .addFunction(generateImplementationEquals(properties, implClassName))
             .addFunction(generateImplementationHashCode(properties))
             .addFunction(generateImplementationToString(properties, className))
             .addOptionalOriginatingKSFile(originatingFile)
@@ -108,7 +135,7 @@ class ModelGenerator(
 
     private fun generateImplementationEquals(
         properties: ModelProperties,
-        className: ClassName,
+        implClassName: ClassName,
     ) = with(resolver) {
         val args = properties.joinToString(" &&\n\t") {
             val name = it.simpleName.asString()
@@ -124,7 +151,7 @@ class ModelGenerator(
             .returns(Boolean::class)
             .addStatement("if (this === other) return true")
             .addStatement("if (javaClass != other?.javaClass) return false")
-            .addStatement("other as %T", className)
+            .addStatement("other as %T", implClassName)
             .addStatement("return %L", args)
             .build()
     }
@@ -152,7 +179,7 @@ class ModelGenerator(
                 } else {
                     name
                 }
-                val trailingComma = if (index < properties.count() - 1) "," else ""
+                val trailingComma = if (index < properties.count() - 1) ", " else ""
                 "append(\"$name=\$${content}${trailingComma}\")"
             })
             add("append(\")\")")
@@ -245,19 +272,12 @@ class ModelGenerator(
         builderClassName: ClassName,
         properties: ModelProperties
     ): List<FunSpec> {
-        // Hide the method from Kotlin code.
-        // This workaround is needed because there's no @JavaOnly annotation available:
-        // https://youtrack.jetbrains.com/issue/KT-36439
-        val hideFromKotlin = AnnotationSpec.builder(SinceKotlin::class)
-            .addMember("%S", "99999999.9")
-            .build()
-
         return properties.map { property ->
             val name = property.simpleName.asString()
             val type = property.type.toTypeName()
-            FunSpec.builder(name)
+            FunSpec.builder("set${name.capitalizeCompat()}")
                 .addParameter(name, type)
-                .addAnnotation(hideFromKotlin)
+                .hideFromKotlin()
                 .addStatement("return %M { this.$name = $name }", MemberName("kotlin", "apply"))
                 .returns(builderClassName)
                 .build()

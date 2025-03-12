@@ -74,6 +74,7 @@ interface EqualityModel {
 }
 
 fun main() {
+    // Test equality
     val eq1 = EqualityModel {
         a = "Test"
         b = 42
@@ -87,6 +88,7 @@ fun main() {
     println("eq1 == eq2: ${eq1 == eq2}")
     println()
 
+    // Test FullModel
     val modelWithDefaults = ModelWithDefaults()
     val model = FullModel {
         string = "Hello, World!"
@@ -103,7 +105,9 @@ fun main() {
     val sameModel = model.copy()
     println(model)
     println("model == sameModel: ${model == sameModel}")
+    println()
 
+    // Test copy method
     val copy = model.copy {
         optString = "Optional string"
         optInt = 123
