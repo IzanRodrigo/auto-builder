@@ -215,39 +215,53 @@ class ModelGenerator(
             .build()
     }
 
-    private fun generateBuilderProperties(properties: ModelProperties) = properties.map { property ->
-        val name = property.simpleName.asString()
-        val type = property.type.resolve()
-        val defaultValue = getPropertyDefaultValue(property)
-        val typeName = type.toTypeName()
-            .copy(nullable = type.isMarkedNullable || defaultValue == null)
-        PropertySpec.builder(name, typeName)
-            .mutable()
-            .let {
-                when {
-                    typeName.isNullable -> it.initializer("source?.%L", name)
-                    defaultValue != null -> it.initializer(
-                        "source?.%L ?: %L",
-                        name,
-                        defaultValue
-                    )
+    private fun generateBuilderProperties(properties: ModelProperties) =
+        properties.map { property ->
+            val name = property.simpleName.asString()
+            val type = property.type.resolve()
+            val defaultValue = getPropertyDefaultValue(property)
+            val typeName = type.toTypeName()
+                .copy(nullable = type.isMarkedNullable || defaultValue == null)
+            PropertySpec.builder(name, typeName)
+                .mutable()
+                .let {
+                    when {
+                        typeName.isNullable -> it.initializer("source?.%L", name)
+                        defaultValue != null -> it.initializer(
+                            "source?.%L ?: %L",
+                            name,
+                            defaultValue
+                        )
 
-                    else -> it // Won't happen because 'defaultValue' was already checked.
+                        else -> it // Won't happen because 'defaultValue' was already checked.
+                    }
                 }
-            }
-            .setter(FunSpec.setterBuilder().addAnnotation(JvmSynthetic::class).build())
-            .addAnnotations(property.kAnnotations)
-            .build()
-    }
+                .setter(FunSpec.setterBuilder().addAnnotation(JvmSynthetic::class).build())
+                .addAnnotations(property.kAnnotations)
+                .build()
+        }
 
-    private fun generateBuilderJavaMethods(builderClassName: ClassName, properties: ModelProperties) = properties.map { property ->
-        val name = property.simpleName.asString()
-        val type = property.type.toTypeName()
-        FunSpec.builder(name)
-            .addParameter(name, type)
-            .addStatement("return %M { this.$name = $name }", MemberName("kotlin", "apply"))
-            .returns(builderClassName)
+    private fun generateBuilderJavaMethods(
+        builderClassName: ClassName,
+        properties: ModelProperties
+    ): List<FunSpec> {
+        // Hide the method from Kotlin code.
+        // This workaround is needed because there's no @JavaOnly annotation available:
+        // https://youtrack.jetbrains.com/issue/KT-36439
+        val hideFromKotlin = AnnotationSpec.builder(SinceKotlin::class)
+            .addMember("%S", "99999999.9")
             .build()
+
+        return properties.map { property ->
+            val name = property.simpleName.asString()
+            val type = property.type.toTypeName()
+            FunSpec.builder(name)
+                .addParameter(name, type)
+                .addAnnotation(hideFromKotlin)
+                .addStatement("return %M { this.$name = $name }", MemberName("kotlin", "apply"))
+                .returns(builderClassName)
+                .build()
+        }
     }
 
     private fun getPropertyDefaultValue(property: KSPropertyDeclaration): String? = with(resolver) {
