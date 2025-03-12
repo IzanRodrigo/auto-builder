@@ -2,6 +2,7 @@
 
 package app.izantech.plugin.autobuilder.processor.util
 
+import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getClassDeclarationByName
@@ -11,7 +12,8 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import app.izantech.plugin.autobuilder.annotation.AutoBuilder
+import java.math.BigDecimal
+import java.math.BigInteger
 
 internal val KSClassDeclaration.autoBuilderAnnotation
     get() = getAnnotationsByType(AutoBuilder::class).first()
@@ -63,13 +65,22 @@ internal val KSType.defaultValueOrNull
         builtIns.iterableType -> "emptyList()"
         builtIns.arrayType -> "emptyArray()"
         else -> when {
+            builtIns.arrayType.isAssignableFrom(projection) -> "emptyArray()"
             builtIns.iterableType.isAssignableFrom(projection) -> "emptyList()"
+            projection.instanceOf<BigDecimal>() -> "BigDecimal.ZERO"
+            projection.instanceOf<BigInteger>() -> "BigInteger.ZERO"
             else -> null
         }
     }
 
-internal fun KSClassDeclaration.getProperties(useInherited: Boolean) =
-    when {
+context(Resolver)
+internal inline fun <reified T> KSType.instanceOf() =
+    getClassDeclarationByName<T>()?.asStarProjectedType()?.isAssignableFrom(this) == true
+
+internal fun KSClassDeclaration.getProperties(useInherited: Boolean): Iterable<KSPropertyDeclaration> {
+    val properties = when {
         useInherited -> getAllProperties().toSet()
         else -> getDeclaredProperties().toSet()
     }
+    return properties.filter { it.autoBuilderPropertyAnnotation?.ignored != true }
+}

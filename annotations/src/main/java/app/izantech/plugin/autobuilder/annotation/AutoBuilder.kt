@@ -16,6 +16,8 @@ annotation class AutoBuilder(val inheritedProperties: Boolean = false) {
      * @param defaultValue The default value for the property. By default the value is inferred from the property type.
      */
     @Target(AnnotationTarget.PROPERTY)
-    annotation class Property(val defaultValue: String = "")
-
+    annotation class Property(
+        val defaultValue: String = "",
+        val ignored: Boolean = false,
+    )
 }
