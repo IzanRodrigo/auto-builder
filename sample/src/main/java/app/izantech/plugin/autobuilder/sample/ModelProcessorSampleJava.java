@@ -29,6 +29,10 @@ public class ModelProcessorSampleJava {
                     println("Lambda");
                     return Unit.INSTANCE;
                 })
+                .setLambdaWithAnnotation(() -> {
+                    println("Lambda with annotation");
+                    return Unit.INSTANCE;
+                })
                 .build();
         var sameModel = new FullModelBuilder(model).build();
         println(model);

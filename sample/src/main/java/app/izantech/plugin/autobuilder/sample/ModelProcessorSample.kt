@@ -3,7 +3,7 @@ package app.izantech.plugin.autobuilder.sample
 import androidx.annotation.FloatRange
 import androidx.compose.runtime.Composable
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
-import app.izantech.plugin.autobuilder.annotation.AutoBuilder.Property
+import app.izantech.plugin.autobuilder.annotation.DefaultValue
 
 data class ComplexObject(
     val string: String = "Default string",
@@ -12,6 +12,7 @@ data class ComplexObject(
 )
 
 interface NonOptionalProperties {
+    val charSequence: CharSequence
     val string: String
     val int: Int
     val double: Double
@@ -27,9 +28,11 @@ interface NonOptionalProperties {
     val complexObject: ComplexObject
     val generatedObject: ModelWithDefaults
     val lambda: () -> Unit
+    val lambdaWithAnnotation: @Composable () -> Unit
 }
 
 interface OptionalProperties {
+    val optCharSequence: CharSequence?
     val optString: String?
     val optInt: Int?
     val optDouble: Double?
@@ -45,6 +48,7 @@ interface OptionalProperties {
     val optComplexObject: ComplexObject?
     val optGeneratedObject: ModelWithDefaults?
     val optLambda: (() -> Unit)?
+    val optLambdaWithAnnotation: @Composable (() -> Unit)?
 }
 
 @AutoBuilder(inheritedProperties = true)
@@ -52,20 +56,20 @@ interface FullModel : NonOptionalProperties, OptionalProperties
 
 @AutoBuilder
 interface ModelWithDefaults {
-    @Property(defaultValue = "Default String")
     val stringWithDefault: String
+        @DefaultValue get() = "Default String"
 
-    @Property(defaultValue = "42")
     val intWithDefault: Int
+        @DefaultValue get() = 42
 
-    @Property(defaultValue = "3.1416")
     val doubleWithDefault: Double
+        @DefaultValue get() = 3.1416
 
-    @Property(defaultValue = "Default CharSequence")
     val charSequenceWithDefault: CharSequence
+        @DefaultValue get() = "Default CharSequence"
 
-    @Property(defaultValue = "ComplexObject()")
     val complexObjectWithDefault: ComplexObject
+        @DefaultValue get() = ComplexObject()
 }
 
 @AutoBuilder
@@ -109,6 +113,7 @@ fun main() {
         )
         generatedObject = modelWithDefaults
         lambda = { println("Lambda") }
+        lambdaWithAnnotation = @Composable { println("Lambda with annotation") }
     }
     val sameModel = model.copy()
     println(model)
@@ -134,6 +139,7 @@ fun main() {
     }
     println(copy)
     println("model == copy: ${model == copy}")
+    println()
 
     // Test functions.
     val modelWithFunctions = ModelWithFunctions {
@@ -145,4 +151,5 @@ fun main() {
     println(modelWithFunctions)
     println(modelWithFunctionsCopy)
     println("modelWithFunctions == modelWithFunctionsCopy: ${modelWithFunctions == modelWithFunctionsCopy}")
+    println()
 }

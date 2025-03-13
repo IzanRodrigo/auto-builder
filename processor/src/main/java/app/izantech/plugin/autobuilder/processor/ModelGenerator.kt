@@ -1,28 +1,27 @@
+@file:OptIn(DelicateKotlinPoetApi::class)
+
 package app.izantech.plugin.autobuilder.processor
 
-import app.izantech.plugin.autobuilder.processor.util.ModelAnnotations
-import app.izantech.plugin.autobuilder.processor.util.ModelProperties
-import app.izantech.plugin.autobuilder.processor.util.ModelProperty
+import app.izantech.plugin.autobuilder.processor.model.AutoBuilderClass
+import app.izantech.plugin.autobuilder.processor.model.ModelProperties
 import app.izantech.plugin.autobuilder.processor.util.addOptionalOriginatingKSFile
-import app.izantech.plugin.autobuilder.processor.util.autoBuilderAnnotation
 import app.izantech.plugin.autobuilder.processor.util.capitalizeCompat
-import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
-import app.izantech.plugin.autobuilder.processor.util.getProperties
-import app.izantech.plugin.autobuilder.processor.util.hideFromKotlin
+import app.izantech.plugin.autobuilder.processor.util.hidden
+import app.izantech.plugin.autobuilder.processor.util.hideFromKotlinAnnotation
 import app.izantech.plugin.autobuilder.processor.util.isArray
-import app.izantech.plugin.autobuilder.processor.util.isCharSequence
-import app.izantech.plugin.autobuilder.processor.util.isString
-import app.izantech.plugin.autobuilder.processor.util.kAnnotations
 import app.izantech.plugin.autobuilder.processor.util.prettyPrint
-import app.izantech.plugin.autobuilder.processor.util.suppressWarningTypes
+import app.izantech.plugin.autobuilder.processor.util.runIf
+import app.izantech.plugin.autobuilder.processor.util.suppressWarnings
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.google.devtools.ksp.symbol.KSNode
+import com.google.devtools.ksp.visitor.KSDefaultVisitor
 import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -35,67 +34,80 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.UNIT
 import com.squareup.kotlinpoet.ksp.writeTo
 
-class ModelGenerator(
+private val SuppressedWarnings = arrayOf(
+    "ConstPropertyName",
+    "MemberVisibilityCanBePrivate",
+    "NEWER_VERSION_IN_SINCE_KOTLIN",
+    "RedundantNullableReturnType",
+    "RedundantVisibilityModifier",
+    "unused",
+)
+
+internal class ModelGenerator(
     private val resolver: Resolver,
     private val codeGenerator: CodeGenerator,
-) : KSVisitorVoid() {
-    override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-        val originatingFile = classDeclaration.containingFile
-        val packageName = classDeclaration.packageName.asString()
-        val symbolName = classDeclaration.simpleName.asString()
-        val className = ClassName(packageName, symbolName)
-        val implClassName = ClassName(packageName, "${symbolName}Impl")
-        val autoBuilderAnnotation = classDeclaration.autoBuilderAnnotation
-        val properties = classDeclaration.getProperties(
-            useInherited = autoBuilderAnnotation.inheritedProperties,
-        )
-        val annotations = classDeclaration.kAnnotations
-        val builderClassName = ClassName(packageName, "${symbolName}Builder")
+) : KSDefaultVisitor<AutoBuilderClass, Unit>() {
+    override fun defaultHandler(node: KSNode, data: AutoBuilderClass) = Unit
 
-        FileSpec.builder(packageName, "${symbolName}.builder")
-            .suppressWarningTypes(
-                "RedundantVisibilityModifier",
-                "MemberVisibilityCanBePrivate",
-                "NEWER_VERSION_IN_SINCE_KOTLIN",
-                "unused",
-            )
-            .addType(
-                generateImplementation(
-                    originatingFile = originatingFile,
-                    properties = properties,
-                    annotations = annotations,
-                    className = className,
-                    implClassName = implClassName,
-                )
-            )
-            .addType(
-                generateBuilder(
-                    originatingFile = originatingFile,
-                    properties = properties,
-                    className = className,
-                    implClassName = implClassName,
-                )
-            )
-            .addFunctions(
-                generateModelExtensions(
-                    originatingFile = originatingFile,
-                    className = className,
-                    builderClassName = builderClassName,
-                )
-            )
+    override fun visitClassDeclaration(
+        classDeclaration: KSClassDeclaration,
+        data: AutoBuilderClass
+    ) {
+        val originatingFile = classDeclaration.containingFile
+
+        FileSpec.builder(data.packageName, "${data.name}.defaults")
+            .suppressWarnings(*SuppressedWarnings)
+            .addType(generateDefaultsObject(originatingFile, data))
+            .build()
+            .writeTo(codeGenerator, Dependencies(aggregating = true))
+
+        FileSpec.builder(data.packageName, "${data.name}.builder")
+            .suppressWarnings(*SuppressedWarnings)
+            .addType(generateImplementation(originatingFile, data))
+            .addType(generateBuilder(originatingFile, data))
+            .addFunctions(generateModelExtensions(originatingFile, data))
             .build()
             .writeTo(codeGenerator, Dependencies(aggregating = true))
     }
 
+    // region Companion
+    private fun generateDefaultsObject(
+        originatingFile: KSFile?,
+        data: AutoBuilderClass,
+    ) = with(data) {
+        TypeSpec.objectBuilder(defaultsClassName)
+            .addSuperinterface(data.className)
+            .addProperties(generateDefaultsProperties(properties))
+            .addOptionalOriginatingKSFile(originatingFile)
+            .build()
+    }
+
+    private fun generateDefaultsProperties(
+        properties: ModelProperties,
+    ) = properties.mapNotNull { property ->
+        if (property.hasCustomDefaultValue) return@mapNotNull null
+        PropertySpec.builder(property.name, property.typeName)
+            .let {
+                val defaultValue = property.defaultValue
+                if (defaultValue == null) {
+                    it.hidden()
+                } else {
+                    it.initializer(defaultValue)
+                        .addAnnotations(property.annotations)
+                }
+            }
+            .addModifiers(KModifier.OVERRIDE)
+            .build()
+    }
+
+    // endregion
+
     // region ModelImpl
     private fun generateImplementation(
         originatingFile: KSFile?,
-        properties: ModelProperties,
-        annotations: ModelAnnotations,
-        className: ClassName,
-        implClassName: ClassName,
-    ): TypeSpec {
-        return TypeSpec.classBuilder(implClassName)
+        data: AutoBuilderClass,
+    ) = with(data) {
+        TypeSpec.classBuilder(implClassName)
             .addAnnotations(annotations)
             .addModifiers(KModifier.PRIVATE)
             .addSuperinterface(className)
@@ -190,12 +202,9 @@ class ModelGenerator(
     // region Builder
     private fun generateBuilder(
         originatingFile: KSFile?,
-        properties: ModelProperties,
-        className: ClassName,
-        implClassName: ClassName,
-    ): TypeSpec {
-        val builderClassName = ClassName(className.packageName, "${className.simpleName}Builder")
-        val builderProperties = generateBuilderProperties(properties)
+        data: AutoBuilderClass,
+    ) = with(data) {
+        val builderProperties = generateBuilderProperties(properties, defaultsMemberName)
         val constructorParameters = builderProperties.prettyPrint { builderProperty ->
             // Edge case:
             //  Builder properties can be nullable even if the symbol property is not.
@@ -208,7 +217,8 @@ class ModelGenerator(
                 "${builderProperty.name} = ${builderProperty.name},"
             }
         }
-        return TypeSpec.classBuilder(builderClassName)
+
+        TypeSpec.classBuilder(builderClassName)
             .primaryConstructor(
                 FunSpec.constructorBuilder()
                     .addModifiers(KModifier.INTERNAL)
@@ -232,29 +242,26 @@ class ModelGenerator(
             .build()
     }
 
-    private fun generateBuilderProperties(properties: ModelProperties) =
-        properties.map { property ->
-            val defaultValue = getPropertyDefaultValue(property)
-            val typeName = property.typeName
-                .let { if (defaultValue == null) it.copy(nullable = true) else it }
-            PropertySpec.builder(property.name, typeName)
-                .mutable()
-                .let {
-                    when {
-                        typeName.isNullable -> it.initializer("source?.%L", property.name)
-                        defaultValue != null -> it.initializer(
-                            "source?.%L ?: %L",
-                            property.name,
-                            defaultValue
-                        )
-
-                        else -> it // Won't happen because 'defaultValue' was already checked.
-                    }
+    private fun generateBuilderProperties(
+        properties: ModelProperties,
+        defaultsMemberName: MemberName,
+    ) = properties.map { property ->
+        val defaultValue = property.defaultValue
+        val hasDefaultValue = defaultValue != null || property.hasCustomDefaultValue
+        val typeName = property.typeName.runIf(!hasDefaultValue) { copy(nullable = true) }
+        PropertySpec.builder(property.name, typeName)
+            .mutable()
+            .let {
+                if (hasDefaultValue) {
+                    it.initializer("source?.%L ?: %M.${property.name}", property.name, defaultsMemberName)
+                } else {
+                    it.initializer("source?.%L", property.name)
                 }
-                .setter(FunSpec.setterBuilder().addAnnotation(JvmSynthetic::class).build())
-                .addAnnotations(property.annotations)
-                .build()
-        }
+            }
+            .setter(FunSpec.setterBuilder().addAnnotation(JvmSynthetic::class).build())
+            .addAnnotations(property.annotations)
+            .build()
+    }
 
     private fun generateBuilderJavaMethods(
         builderClassName: ClassName,
@@ -263,25 +270,13 @@ class ModelGenerator(
         return properties.map { property ->
             FunSpec.builder("set${property.name.capitalizeCompat()}")
                 .addParameter(property.name, property.typeName)
-                .hideFromKotlin()
-                .addStatement("return %M { this.${property.name} = ${property.name} }", MemberName("kotlin", "apply"))
+                .addAnnotation(hideFromKotlinAnnotation())
+                .addStatement(
+                    "return %M { this.${property.name} = ${property.name} }",
+                    MemberName("kotlin", "apply")
+                )
                 .returns(builderClassName)
                 .build()
-        }
-    }
-
-    private fun getPropertyDefaultValue(property: ModelProperty): String? = with(resolver) {
-        val type = property.resolvedType
-        // Return the default value from the annotation if it exists.
-        val defaultPropertyValue = property.propertyAnnotation
-            ?.defaultValue
-            ?.takeIf(String::isNotBlank)
-        return if (defaultPropertyValue != null) {
-            val isStringLiteral = type.isString || type.isCharSequence
-            if (isStringLiteral) "\"$defaultPropertyValue\"" else defaultPropertyValue
-        } else {
-            // Otherwise try to infer the default value from the type.
-            type.defaultValueOrNull
         }
     }
     // endregion
@@ -289,9 +284,8 @@ class ModelGenerator(
     // region Model extensions
     private fun generateModelExtensions(
         originatingFile: KSFile?,
-        className: ClassName,
-        builderClassName: ClassName,
-    ): Iterable<FunSpec> {
+        data: AutoBuilderClass,
+    ) = with(data) {
         val initLambdaTypeName = LambdaTypeName.get(receiver = builderClassName, returnType = UNIT)
         val initLambdaParameter = ParameterSpec
             .builder("init", initLambdaTypeName)
@@ -323,7 +317,7 @@ class ModelGenerator(
             .addOptionalOriginatingKSFile(originatingFile)
             .build()
 
-        return listOf(initializerFunction, copyFunction)
+        listOf(initializerFunction, copyFunction)
     }
     // endregion
 }

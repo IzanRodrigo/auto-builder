@@ -2,23 +2,15 @@
 
 package app.izantech.plugin.autobuilder.processor.util
 
-import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getClassDeclarationByName
-import com.google.devtools.ksp.getDeclaredProperties
-import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.processing.Resolver
-import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSType
 import java.math.BigDecimal
 import java.math.BigInteger
-
-internal val KSClassDeclaration.autoBuilderAnnotation
-    get() = getAnnotationsByType(AutoBuilder::class).first()
-
-internal val KSType.hasAutoBuilderAnnotation
-    get() = annotations.any { it.annotationType.isAnnotationPresent(AutoBuilder::class) }
 
 context(Resolver)
 internal val KSType.isPrimitive
@@ -40,11 +32,8 @@ internal val KSType.isString
     get() = builtIns.stringType.isAssignableFrom(this)
 
 context(Resolver)
-internal val KSType.isCharSequence: Boolean
-    get() {
-        val charSequenceType = getClassDeclarationByName<CharSequence>()?.asStarProjectedType()
-        return charSequenceType?.let(::isAssignableFrom) == true
-    }
+internal val KSType.canBeConst
+    get() = isPrimitive || isString
 
 context(Resolver)
 internal val KSType.defaultValueOrNull
@@ -65,6 +54,8 @@ internal val KSType.defaultValueOrNull
             builtIns.iterableType.isAssignableFrom(projection) -> "emptyList()"
             projection.instanceOf<BigDecimal>() -> "BigDecimal.ZERO"
             projection.instanceOf<BigInteger>() -> "BigInteger.ZERO"
+            projection.instanceOf<CharSequence>() -> "\"\""
+            projection.isMarkedNullable -> "null"
             else -> null
         }
     }
@@ -73,12 +64,9 @@ context(Resolver)
 internal inline fun <reified T> KSType.instanceOf() =
     getClassDeclarationByName<T>()?.asStarProjectedType()?.isAssignableFrom(this) == true
 
-internal fun KSClassDeclaration.getProperties(useInherited: Boolean): ModelProperties {
-    val properties = when {
-        useInherited -> getAllProperties()
-        else -> getDeclaredProperties()
-    }
-    return properties
-        .mapNotNull(AutoBuilderProperty::from)
-        .toSet()
-}
+context(Resolver)
+internal inline fun <reified T> KSAnnotation.instanceOf() =
+    annotationType.resolve().instanceOf<T>()
+
+inline fun <reified T : Annotation> KSAnnotated.annotationOrNull() =
+    getAnnotationsByType(T::class).firstOrNull()

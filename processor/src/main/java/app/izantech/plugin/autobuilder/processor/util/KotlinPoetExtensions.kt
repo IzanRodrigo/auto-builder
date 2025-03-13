@@ -1,17 +1,20 @@
+@file:OptIn(DelicateKotlinPoetApi::class)
+
 package app.izantech.plugin.autobuilder.processor.util
 
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
 import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 
-internal fun FileSpec.Builder.suppressWarningTypes(vararg types: String): FileSpec.Builder {
+internal fun FileSpec.Builder.suppressWarnings(vararg types: String): FileSpec.Builder {
     if (types.isEmpty()) {
         return this
     }
@@ -34,17 +37,23 @@ internal fun TypeSpec.Builder.addOptionalOriginatingKSFile(file: KSFile?) =
 internal fun FunSpec.Builder.addOptionalOriginatingKSFile(file: KSFile?) =
     file?.let(::addOriginatingKSFile) ?: this
 
-internal fun FunSpec.Builder.hideFromKotlin(): FunSpec.Builder {
+internal fun hideFromKotlinAnnotation(): AnnotationSpec {
     // Hide the method from Kotlin code.
     // This workaround is needed because there's no @JavaOnly annotation available:
     // https://youtrack.jetbrains.com/issue/KT-36439
-    return addAnnotation(AnnotationSpec.builder(SinceKotlin::class)
+    return AnnotationSpec.builder(SinceKotlin::class)
         .addMember("%S", "99999999.9")
-        .build())
+        .build()
 }
 
-internal val KSClassDeclaration.kAnnotations
-    get() = annotations.toKAnnotations()
+internal fun PropertySpec.Builder.hidden() = this
+    .addAnnotation(hideFromKotlinAnnotation())
+    .getter(
+        FunSpec.getterBuilder()
+            .addAnnotation(JvmSynthetic::class)
+            .addStatement("return error(\"Hidden.\")")
+            .build()
+    )
 
 internal fun Sequence<KSAnnotation>?.toKAnnotations() = orEmpty()
     .filter { it.shortName.asString() != AutoBuilder::class.simpleName }

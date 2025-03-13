@@ -1,40 +1,48 @@
 @file:OptIn(KspExperimental::class)
 
-package app.izantech.plugin.autobuilder.processor.util
+package app.izantech.plugin.autobuilder.processor.model
 
-import app.izantech.plugin.autobuilder.annotation.AutoBuilder.Property
+import app.izantech.plugin.autobuilder.annotation.DefaultValue
+import app.izantech.plugin.autobuilder.annotation.Ignored
+import app.izantech.plugin.autobuilder.processor.util.annotationOrNull
+import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
+import app.izantech.plugin.autobuilder.processor.util.instanceOf
+import app.izantech.plugin.autobuilder.processor.util.toKAnnotations
 import com.google.devtools.ksp.KspExperimental
-import com.google.devtools.ksp.getAnnotationsByType
+import com.google.devtools.ksp.isPublic
+import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 
-internal typealias ModelProperty = AutoBuilderProperty
-internal typealias ModelProperties = Iterable<ModelProperty>
-internal typealias ModelAnnotations = Iterable<AnnotationSpec>
-
 internal class AutoBuilderProperty private constructor(
     val name: String,
     val typeName: TypeName,
     val annotations: Iterable<AnnotationSpec>,
     val isMutable: Boolean,
-    val propertyAnnotation: Property?,
+    val hasCustomDefaultValue: Boolean,
     val resolvedType: KSType,
+    val defaultValue: String?,
 ) {
     companion object {
+        context(Resolver)
         fun from(declaration: KSPropertyDeclaration): AutoBuilderProperty? {
-            val propertyAnnotation = declaration.propertyAnnotation
-            if (propertyAnnotation?.ignored == true) return null
+            if (!declaration.isPublic()) return null
 
+            val isIgnored = declaration.annotationOrNull<Ignored>() != null
+            if (isIgnored) return null
+
+            val resolvedType = declaration.type.resolve()
             return AutoBuilderProperty(
                 name = declaration.simpleName.asString(),
                 typeName = declaration.typeName,
                 annotations = declaration.kAnnotations,
                 isMutable = declaration.isMutable,
-                propertyAnnotation = propertyAnnotation,
-                resolvedType = declaration.type.resolve(),
+                hasCustomDefaultValue = declaration.getter?.annotationOrNull<DefaultValue>() != null,
+                resolvedType = resolvedType,
+                defaultValue = resolvedType.defaultValueOrNull,
             )
         }
     }
@@ -43,11 +51,12 @@ internal class AutoBuilderProperty private constructor(
         get() = typeName.isNullable
 }
 
+context(Resolver)
 private val KSPropertyDeclaration.kAnnotations
-    get() = getter?.annotations.toKAnnotations()
-
-private val KSPropertyDeclaration.propertyAnnotation
-    get() = getAnnotationsByType(Property::class).firstOrNull()
+    get() = getter
+        ?.annotations
+        ?.filterNot { it.instanceOf<DefaultValue>() }
+        .toKAnnotations()
 
 private val KSPropertyDeclaration.typeName: TypeName
     get() {
