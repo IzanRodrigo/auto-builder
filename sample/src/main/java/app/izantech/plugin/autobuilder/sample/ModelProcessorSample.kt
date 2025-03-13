@@ -1,6 +1,7 @@
 package app.izantech.plugin.autobuilder.sample
 
 import androidx.annotation.FloatRange
+import androidx.compose.runtime.Composable
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder.Property
 
@@ -73,6 +74,13 @@ interface EqualityModel {
     val b: Int
 }
 
+@AutoBuilder
+interface ModelWithFunctions {
+    val regularFunction: () -> Unit
+    val suspendFunction: suspend () -> Unit
+    val composableFunction: @Composable () -> Unit
+}
+
 fun main() {
     // Test equality
     val eq1 = EqualityModel {
@@ -126,4 +134,15 @@ fun main() {
     }
     println(copy)
     println("model == copy: ${model == copy}")
+
+    // Test functions.
+    val modelWithFunctions = ModelWithFunctions {
+        regularFunction = { println("Regular function") }
+        suspendFunction = suspend { println("Suspend function") }
+        composableFunction = @Composable { println("Composable function") }
+    }
+    val modelWithFunctionsCopy = modelWithFunctions.copy()
+    println(modelWithFunctions)
+    println(modelWithFunctionsCopy)
+    println("modelWithFunctions == modelWithFunctionsCopy: ${modelWithFunctions == modelWithFunctionsCopy}")
 }

@@ -7,6 +7,8 @@ plugins {
 dependencies {
     implementation(projects.annotations)
     implementation(libs.androidX.annotations)
+    implementation(platform(libs.androidX.compose.bom))
+    implementation(libs.androidX.compose.runtime)
     ksp(projects.processor)
 }
 

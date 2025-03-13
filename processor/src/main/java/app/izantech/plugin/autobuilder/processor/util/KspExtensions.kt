@@ -10,16 +10,12 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import java.math.BigDecimal
 import java.math.BigInteger
 
 internal val KSClassDeclaration.autoBuilderAnnotation
     get() = getAnnotationsByType(AutoBuilder::class).first()
-
-internal val KSPropertyDeclaration.autoBuilderPropertyAnnotation
-    get() = getAnnotationsByType(AutoBuilder.Property::class).firstOrNull()
 
 internal val KSType.hasAutoBuilderAnnotation
     get() = annotations.any { it.annotationType.isAnnotationPresent(AutoBuilder::class) }
@@ -77,10 +73,12 @@ context(Resolver)
 internal inline fun <reified T> KSType.instanceOf() =
     getClassDeclarationByName<T>()?.asStarProjectedType()?.isAssignableFrom(this) == true
 
-internal fun KSClassDeclaration.getProperties(useInherited: Boolean): Iterable<KSPropertyDeclaration> {
+internal fun KSClassDeclaration.getProperties(useInherited: Boolean): ModelProperties {
     val properties = when {
-        useInherited -> getAllProperties().toSet()
-        else -> getDeclaredProperties().toSet()
+        useInherited -> getAllProperties()
+        else -> getDeclaredProperties()
     }
-    return properties.filter { it.autoBuilderPropertyAnnotation?.ignored != true }
+    return properties
+        .mapNotNull(AutoBuilderProperty::from)
+        .toSet()
 }

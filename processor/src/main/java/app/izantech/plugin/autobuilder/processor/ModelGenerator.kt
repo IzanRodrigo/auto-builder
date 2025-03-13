@@ -1,8 +1,10 @@
 package app.izantech.plugin.autobuilder.processor
 
+import app.izantech.plugin.autobuilder.processor.util.ModelAnnotations
+import app.izantech.plugin.autobuilder.processor.util.ModelProperties
+import app.izantech.plugin.autobuilder.processor.util.ModelProperty
 import app.izantech.plugin.autobuilder.processor.util.addOptionalOriginatingKSFile
 import app.izantech.plugin.autobuilder.processor.util.autoBuilderAnnotation
-import app.izantech.plugin.autobuilder.processor.util.autoBuilderPropertyAnnotation
 import app.izantech.plugin.autobuilder.processor.util.capitalizeCompat
 import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
 import app.izantech.plugin.autobuilder.processor.util.getProperties
@@ -18,10 +20,8 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.squareup.kotlinpoet.ANY
-import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -33,11 +33,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.UNIT
-import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
-
-private typealias ModelProperties = Iterable<KSPropertyDeclaration>
-private typealias ModelAnnotations = Iterable<AnnotationSpec>
 
 class ModelGenerator(
     private val resolver: Resolver,
@@ -61,6 +57,7 @@ class ModelGenerator(
                 "RedundantVisibilityModifier",
                 "MemberVisibilityCanBePrivate",
                 "NEWER_VERSION_IN_SINCE_KOTLIN",
+                "unused",
             )
             .addType(
                 generateImplementation(
@@ -114,20 +111,15 @@ class ModelGenerator(
     private fun generateImplementationPrimaryConstructor(properties: ModelProperties) =
         FunSpec.constructorBuilder()
             .addParameters(properties.map { property ->
-                val name = property.simpleName.asString()
-                val type = property.type.toTypeName()
-                ParameterSpec.builder(name, type)
-                    .addAnnotations(property.kAnnotations)
-                    .build()
+                ParameterSpec.builder(property.name, property.typeName).build()
             })
             .build()
 
     private fun generateImplementationProperties(properties: ModelProperties) =
         properties.map { property ->
-            val name = property.simpleName.asString()
-            val type = property.type.toTypeName()
-            PropertySpec.builder(name, type)
-                .initializer(name)
+            PropertySpec.builder(property.name, property.typeName)
+                .initializer(property.name)
+                .addAnnotations(property.annotations)
                 .addModifiers(KModifier.OVERRIDE)
                 .mutable(property.isMutable)
                 .build()
@@ -138,11 +130,10 @@ class ModelGenerator(
         implClassName: ClassName,
     ) = with(resolver) {
         val args = properties.joinToString(" &&\n\t") {
-            val name = it.simpleName.asString()
-            if (it.type.resolve().isArray) {
-                "this.$name.contentEquals(other.$name)"
+            if (it.resolvedType.isArray) {
+                "this.${it.name}.contentEquals(other.${it.name})"
             } else {
-                "this.$name == other.$name"
+                "this.${it.name} == other.${it.name}"
             }
         }
         FunSpec.builder("equals")
@@ -157,7 +148,7 @@ class ModelGenerator(
     }
 
     private fun generateImplementationHashCode(properties: ModelProperties): FunSpec {
-        val args = properties.prettyPrint { "${it.simpleName.asString()}," }
+        val args = properties.prettyPrint { "${it.name}," }
         val javaHash = ClassName("java.util", "Objects").member("hash")
         return FunSpec.builder("hashCode")
             .addModifiers(KModifier.OVERRIDE)
@@ -173,14 +164,13 @@ class ModelGenerator(
         val args = buildList {
             add("append(\"${className.simpleName}(\")")
             addAll(properties.mapIndexed { index, it ->
-                val name = it.simpleName.asString()
-                val content = if (it.type.resolve().isArray) {
-                    "{${name}.contentToString()}"
+                val content = if (it.resolvedType.isArray) {
+                    "{${it.name}.contentToString()}"
                 } else {
-                    name
+                    it.name
                 }
                 val trailingComma = if (index < properties.count() - 1) ", " else ""
-                "append(\"$name=\$${content}${trailingComma}\")"
+                "append(\"${it.name}=\$${content}${trailingComma}\")"
             })
             add("append(\")\")")
         }
@@ -211,8 +201,8 @@ class ModelGenerator(
             //  Builder properties can be nullable even if the symbol property is not.
             //  This may happen when the we can't infer the default value of the symbol property.
             val symbolProperty = properties
-                .first { it.simpleName.asString() == builderProperty.name }
-            if (!symbolProperty.type.resolve().isMarkedNullable && builderProperty.type.isNullable) {
+                .first { it.name == builderProperty.name }
+            if (!symbolProperty.isNullable && builderProperty.type.isNullable) {
                 "${builderProperty.name} = requireNotNull(${builderProperty.name}),"
             } else {
                 "${builderProperty.name} = ${builderProperty.name},"
@@ -244,19 +234,17 @@ class ModelGenerator(
 
     private fun generateBuilderProperties(properties: ModelProperties) =
         properties.map { property ->
-            val name = property.simpleName.asString()
-            val type = property.type.resolve()
             val defaultValue = getPropertyDefaultValue(property)
-            val typeName = type.toTypeName()
-                .copy(nullable = type.isMarkedNullable || defaultValue == null)
-            PropertySpec.builder(name, typeName)
+            val typeName = property.typeName
+                .let { if (defaultValue == null) it.copy(nullable = true) else it }
+            PropertySpec.builder(property.name, typeName)
                 .mutable()
                 .let {
                     when {
-                        typeName.isNullable -> it.initializer("source?.%L", name)
+                        typeName.isNullable -> it.initializer("source?.%L", property.name)
                         defaultValue != null -> it.initializer(
                             "source?.%L ?: %L",
-                            name,
+                            property.name,
                             defaultValue
                         )
 
@@ -264,7 +252,7 @@ class ModelGenerator(
                     }
                 }
                 .setter(FunSpec.setterBuilder().addAnnotation(JvmSynthetic::class).build())
-                .addAnnotations(property.kAnnotations)
+                .addAnnotations(property.annotations)
                 .build()
         }
 
@@ -273,22 +261,19 @@ class ModelGenerator(
         properties: ModelProperties
     ): List<FunSpec> {
         return properties.map { property ->
-            val name = property.simpleName.asString()
-            val type = property.type.toTypeName()
-            FunSpec.builder("set${name.capitalizeCompat()}")
-                .addParameter(name, type)
+            FunSpec.builder("set${property.name.capitalizeCompat()}")
+                .addParameter(property.name, property.typeName)
                 .hideFromKotlin()
-                .addStatement("return %M { this.$name = $name }", MemberName("kotlin", "apply"))
+                .addStatement("return %M { this.${property.name} = ${property.name} }", MemberName("kotlin", "apply"))
                 .returns(builderClassName)
                 .build()
         }
     }
 
-    private fun getPropertyDefaultValue(property: KSPropertyDeclaration): String? = with(resolver) {
-        val type = property.type.resolve()
-
+    private fun getPropertyDefaultValue(property: ModelProperty): String? = with(resolver) {
+        val type = property.resolvedType
         // Return the default value from the annotation if it exists.
-        val defaultPropertyValue = property.autoBuilderPropertyAnnotation
+        val defaultPropertyValue = property.propertyAnnotation
             ?.defaultValue
             ?.takeIf(String::isNotBlank)
         return if (defaultPropertyValue != null) {

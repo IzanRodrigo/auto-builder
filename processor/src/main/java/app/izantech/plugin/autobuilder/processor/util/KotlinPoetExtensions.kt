@@ -4,7 +4,6 @@ import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -47,10 +46,7 @@ internal fun FunSpec.Builder.hideFromKotlin(): FunSpec.Builder {
 internal val KSClassDeclaration.kAnnotations
     get() = annotations.toKAnnotations()
 
-internal val KSPropertyDeclaration.kAnnotations
-    get() = getter?.annotations.toKAnnotations()
-
-private fun Sequence<KSAnnotation>?.toKAnnotations() = orEmpty()
+internal fun Sequence<KSAnnotation>?.toKAnnotations() = orEmpty()
     .filter { it.shortName.asString() != AutoBuilder::class.simpleName }
     .map(KSAnnotation::toAnnotationSpec)
     .toList()
