@@ -43,7 +43,7 @@ subprojects {
     plugins.withType<MavenPublishPlugin> {
         configure<MavenPublishBaseExtension> {
             coordinates(group.toString(), "autobuilder-${project.name}", version.toString())
-            configure(KotlinJvm(JavadocJar.None(), sourcesJar = true))
+            configure(KotlinJvm(JavadocJar.Javadoc(), sourcesJar = true))
         }
     }
 }
