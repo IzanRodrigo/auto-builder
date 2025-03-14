@@ -11,12 +11,6 @@ annotation class AutoBuilder(
 )
 
 /**
- * This annotation is used to ignore a property when generating a builder class.
- */
-@Target(AnnotationTarget.PROPERTY)
-annotation class Ignored
-
-/**
  * This annotation is used to specify a default value for a property when generating a builder class.
  */
 @Target(AnnotationTarget.PROPERTY_GETTER)

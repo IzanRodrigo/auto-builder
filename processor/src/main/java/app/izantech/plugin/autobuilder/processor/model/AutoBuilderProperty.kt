@@ -1,14 +1,10 @@
-@file:OptIn(KspExperimental::class)
-
 package app.izantech.plugin.autobuilder.processor.model
 
 import app.izantech.plugin.autobuilder.annotation.DefaultValue
-import app.izantech.plugin.autobuilder.annotation.Ignored
 import app.izantech.plugin.autobuilder.processor.util.annotationOrNull
 import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
 import app.izantech.plugin.autobuilder.processor.util.instanceOf
 import app.izantech.plugin.autobuilder.processor.util.toKAnnotations
-import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
@@ -30,9 +26,6 @@ internal class AutoBuilderProperty private constructor(
         context(Resolver)
         fun from(declaration: KSPropertyDeclaration): AutoBuilderProperty? {
             if (!declaration.isPublic()) return null
-
-            val isIgnored = declaration.annotationOrNull<Ignored>() != null
-            if (isIgnored) return null
 
             val resolvedType = declaration.type.resolve()
             return AutoBuilderProperty(
