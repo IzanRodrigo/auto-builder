@@ -6,8 +6,8 @@ This file will contain the implementation class of your definition interface, th
 
 ```kotlin
 private class UserImpl(
+    override val age: Int,
     override val name: String,
-    override val age: Int
 ) : User {
     // Generated `equals`, `hashCode` and `toString` methods...
 }
