@@ -34,8 +34,8 @@ This file will contain the default values for the properties that don't have a d
 
 ```kotlin
 public object UserDefaults : User {
-  override val name: String = ""
-
   override val age: Int = 0
+
+  override val name: String = ""
 }
 ```
