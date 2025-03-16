@@ -9,7 +9,6 @@ import app.izantech.plugin.autobuilder.processor.util.capitalizeCompat
 import app.izantech.plugin.autobuilder.processor.util.hidden
 import app.izantech.plugin.autobuilder.processor.util.hideFromKotlinAnnotation
 import app.izantech.plugin.autobuilder.processor.util.isArray
-import app.izantech.plugin.autobuilder.processor.util.prettyPrint
 import app.izantech.plugin.autobuilder.processor.util.runIf
 import app.izantech.plugin.autobuilder.processor.util.suppressWarnings
 import com.google.devtools.ksp.processing.CodeGenerator
@@ -141,7 +140,7 @@ internal class ModelGenerator(
         properties: ModelProperties,
         implClassName: ClassName,
     ) = with(resolver) {
-        val args = properties.joinToString(" &&\n\t") {
+        val args = properties.joinToString(" && ") {
             if (it.resolvedType.isArray) {
                 "this.${it.name}.contentEquals(other.${it.name})"
             } else {
@@ -160,12 +159,12 @@ internal class ModelGenerator(
     }
 
     private fun generateImplementationHashCode(properties: ModelProperties): FunSpec {
-        val args = properties.prettyPrint { "${it.name}," }
+        val args = properties.joinToString { it.name }
         val javaHash = ClassName("java.util", "Objects").member("hash")
         return FunSpec.builder("hashCode")
             .addModifiers(KModifier.OVERRIDE)
             .returns(Int::class)
-            .addStatement("return \n\t%M(%L)", javaHash, args)
+            .addStatement("return %M(%L)", javaHash, args)
             .build()
     }
 
@@ -187,8 +186,8 @@ internal class ModelGenerator(
             add("append(\")\")")
         }
         val formattedArgs = args.joinToString(
-            prefix = "\t",
-            separator = "\n\t"
+            prefix = "  ",
+            separator = "\n  "
         )
 
         FunSpec.builder("toString")
@@ -205,16 +204,16 @@ internal class ModelGenerator(
         data: AutoBuilderClass,
     ) = with(data) {
         val builderProperties = generateBuilderProperties(properties, defaultsMemberName)
-        val constructorParameters = builderProperties.prettyPrint { builderProperty ->
+        val constructorParameters = builderProperties.joinToString { builderProperty ->
             // Edge case:
             //  Builder properties can be nullable even if the symbol property is not.
             //  This may happen when the we can't infer the default value of the symbol property.
             val symbolProperty = properties
                 .first { it.name == builderProperty.name }
             if (!symbolProperty.isNullable && builderProperty.type.isNullable) {
-                "${builderProperty.name} = requireNotNull(${builderProperty.name}),"
+                "${builderProperty.name} = requireNotNull(${builderProperty.name})"
             } else {
-                "${builderProperty.name} = ${builderProperty.name},"
+                "${builderProperty.name} = ${builderProperty.name}"
             }
         }
 
@@ -235,7 +234,7 @@ internal class ModelGenerator(
             .addFunction(
                 FunSpec.builder("build")
                     .returns(className)
-                    .addStatement("return \n\t%T(%L)", implClassName, constructorParameters)
+                    .addStatement("return %T(%L)", implClassName, constructorParameters)
                     .build()
             )
             .addOptionalOriginatingKSFile(originatingFile)

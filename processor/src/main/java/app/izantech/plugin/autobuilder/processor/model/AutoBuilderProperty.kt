@@ -21,7 +21,7 @@ internal class AutoBuilderProperty private constructor(
     val hasCustomDefaultValue: Boolean,
     val resolvedType: KSType,
     val defaultValue: String?,
-) {
+): Comparable<AutoBuilderProperty> {
     companion object {
         context(Resolver)
         fun from(declaration: KSPropertyDeclaration): AutoBuilderProperty? {
@@ -42,6 +42,10 @@ internal class AutoBuilderProperty private constructor(
 
     val isNullable: Boolean
         get() = typeName.isNullable
+
+    override fun compareTo(other: AutoBuilderProperty): Int {
+        return name.compareTo(other.name)
+    }
 }
 
 context(Resolver)

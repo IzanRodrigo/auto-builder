@@ -77,5 +77,5 @@ private fun KSClassDeclaration.getProperties(useInherited: Boolean): ModelProper
     }
     return properties
         .mapNotNull { AutoBuilderProperty.from(it) }
-        .toSet()
+        .toSortedSet()
 }

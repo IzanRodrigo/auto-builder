@@ -136,11 +136,11 @@ class AutoBuilderProcessorTests {
             when (file.name) {
                 "TestInterface.builder.kt" -> {
                     assertThat(file)
-                        .hasSameBinaryContentAs(getFile("TestInterface.builder.kt"))
+                        .hasSameBinaryContentAs(getFile(file.name))
                 }
                 "TestInterface.defaults.kt" -> {
                     assertThat(file)
-                        .hasSameBinaryContentAs(getFile("TestInterface.defaults.kt"))
+                        .hasSameBinaryContentAs(getFile(file.name))
                 }
             }
         }
