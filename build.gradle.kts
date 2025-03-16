@@ -26,6 +26,7 @@ allprojects {
                 "-opt-in=kotlin.time.ExperimentalTime",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-Xcontext-receivers",
+                "-Xmulti-dollar-interpolation",
             )
         }
     }

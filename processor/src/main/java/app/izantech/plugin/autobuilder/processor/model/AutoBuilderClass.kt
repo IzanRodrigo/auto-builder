@@ -3,6 +3,7 @@
 package app.izantech.plugin.autobuilder.processor.model
 
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
+import app.izantech.plugin.autobuilder.processor.AutoBuilderErrors
 import app.izantech.plugin.autobuilder.processor.util.toKAnnotations
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
@@ -34,7 +35,7 @@ internal class AutoBuilderClass private constructor(
                 useInherited = modelAnnotation.inheritedProperties,
             )
             if (properties.none()) {
-                error("This model definition must contain at least one property.", symbol)
+                error(AutoBuilderErrors.EMPTY_INTERFACE, symbol)
                 return null
             }
 
