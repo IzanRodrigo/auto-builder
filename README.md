@@ -91,38 +91,15 @@ import java.util.UUID
 @AutoBuilder
 interface User {
     // Other properties...
-    val id: UUID
-}
-```
-
-If we try to initialize a `User` object without setting the `id` property, we will get a runtime error:
-
-```kotlin
-val user = User {
-    name = "John"
-    age = 30
-}
-```
-
-```
-Exception in thread "main" java.lang.IllegalArgumentException: Required value was null.
-	at app.izantech.plugin.autobuilder.sample.UserBuilder.build(User.builder.kt:83)
-	at app.izantech.plugin.autobuilder.sample.ModelProcessorSampleKt.main(ModelProcessorSample.kt:176)
-```
-
-To prevent that, we can use the `@DefaultValue` annotation to provide a default value for the `id`. 
-
-```kotlin
-import java.util.UUID
-
-@AutoBuilder
-interface User {
-    // Other properties...
 
     val id: UUID
         @DefaultValue get() = UUID.randomUUID()
 }
 ```
+
+NOTE: If you forget to add default values to non-null properties, there will be a compile error:
+
+<img width="532" alt="auto-builder-compilation-error" src="https://github.com/user-attachments/assets/b2a0e5ce-e352-431e-ba84-9af6765d9445" />
 
 ## License
 
