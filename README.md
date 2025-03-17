@@ -1,6 +1,6 @@
 # AutoBuilder
-<a href="https://central.sonatype.com/artifact/io.github.izanrodrigo/autobuilder-annotations"><img src="https://img.shields.io/maven-central/v/io.github.izanrodrigo/autobuilder-annotations?label=autobuilder-annotations"/><a/>
-<a href="https://central.sonatype.com/artifact/io.github.izanrodrigo/autobuilder-processor"><img src="https://img.shields.io/maven-central/v/io.github.izanrodrigo/autobuilder-processor?label=autobuilder-processor"/><a/>
+<a href="https://central.sonatype.com/artifact/io.github.izanrodrigo/autobuilder-annotations" target="_blank"><img src="https://img.shields.io/maven-central/v/io.github.izanrodrigo/autobuilder-annotations?label=autobuilder-annotations"/><a/>
+<a href="https://central.sonatype.com/artifact/io.github.izanrodrigo/autobuilder-processor" target="_blank"><img src="https://img.shields.io/maven-central/v/io.github.izanrodrigo/autobuilder-processor?label=autobuilder-processor"/><a/>
 
 AutoBuilder is a symbol processor that generates builder classes from definition interfaces:
 
