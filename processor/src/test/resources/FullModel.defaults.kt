@@ -20,14 +20,12 @@ import kotlin.Int
 import kotlin.Long
 import kotlin.Number
 import kotlin.Short
-import kotlin.SinceKotlin
 import kotlin.String
 import kotlin.Suppress
 import kotlin.Unit
 import kotlin.collections.List
-import kotlin.jvm.JvmSynthetic
 
-public object TestInterfaceDefaults : TestInterface {
+public object FullModelDefaults : FullModel {
   override val array: Array<String> = emptyArray()
 
   override val boolean: Boolean = false
@@ -37,11 +35,6 @@ public object TestInterfaceDefaults : TestInterface {
   override val char: Char = '0'
 
   override val charSequence: CharSequence = ""
-
-  @SinceKotlin("99999999.9")
-  override val complexObject: ComplexObject
-    @JvmSynthetic
-    get() = error("Hidden.")
 
   override val double: Double = 0.0
 
@@ -53,22 +46,7 @@ public object TestInterfaceDefaults : TestInterface {
   )
   override val float: Float = 0f
 
-  @SinceKotlin("99999999.9")
-  override val generatedObject: ModelWithDefaults
-    @JvmSynthetic
-    get() = error("Hidden.")
-
   override val int: Int = 0
-
-  @SinceKotlin("99999999.9")
-  override val lambda: () -> Unit
-    @JvmSynthetic
-    get() = error("Hidden.")
-
-  @SinceKotlin("99999999.9")
-  override val lambdaWithAnnotation: @Composable () -> Unit
-    @JvmSynthetic
-    get() = error("Hidden.")
 
   override val list: List<String> = emptyList()
 

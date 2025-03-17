@@ -1,11 +1,13 @@
 package app.izantech.plugin.autobuilder.processor.model
 
 import app.izantech.plugin.autobuilder.annotation.DefaultValue
+import app.izantech.plugin.autobuilder.processor.AutoBuilderErrors
 import app.izantech.plugin.autobuilder.processor.util.annotationOrNull
 import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
 import app.izantech.plugin.autobuilder.processor.util.instanceOf
 import app.izantech.plugin.autobuilder.processor.util.toKAnnotations
 import com.google.devtools.ksp.isPublic
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -23,19 +25,26 @@ internal class AutoBuilderProperty private constructor(
     val defaultValue: String?,
 ): Comparable<AutoBuilderProperty> {
     companion object {
-        context(Resolver)
+        context(Resolver, KSPLogger)
         fun from(declaration: KSPropertyDeclaration): AutoBuilderProperty? {
             if (!declaration.isPublic()) return null
 
             val resolvedType = declaration.type.resolve()
+            val defaultValue = resolvedType.defaultValueOrNull
+            val hasCustomDefaultValue = declaration.getter?.annotationOrNull<DefaultValue>() != null
+            if (!resolvedType.isMarkedNullable && defaultValue == null && !hasCustomDefaultValue) {
+                error(AutoBuilderErrors.uninitializedProperty(declaration), declaration)
+                return null
+            }
+
             return AutoBuilderProperty(
                 name = declaration.simpleName.asString(),
                 typeName = declaration.typeName,
                 annotations = declaration.kAnnotations,
                 isMutable = declaration.isMutable,
-                hasCustomDefaultValue = declaration.getter?.annotationOrNull<DefaultValue>() != null,
+                hasCustomDefaultValue = hasCustomDefaultValue,
                 resolvedType = resolvedType,
-                defaultValue = resolvedType.defaultValueOrNull,
+                defaultValue = defaultValue,
             )
         }
     }

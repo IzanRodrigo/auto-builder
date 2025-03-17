@@ -34,7 +34,7 @@ class AutoBuilderProcessorTests {
         assertThat(compilationResult.exitCode)
             .isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
         assertThat(compilationResult.messages)
-            .contains(AutoBuilderErrors.NOT_PUBLIC_INTERFACE)
+            .contains(AutoBuilderErrors.TEMPLATE_NOT_PUBLIC_INTERFACE.format("TestInterface"))
     }
 
     @Test fun `WHEN definition interface is internal THEN compilation fails`() {
@@ -55,7 +55,7 @@ class AutoBuilderProcessorTests {
         assertThat(compilationResult.exitCode)
             .isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
         assertThat(compilationResult.messages)
-            .contains(AutoBuilderErrors.NOT_PUBLIC_INTERFACE)
+            .contains(AutoBuilderErrors.TEMPLATE_NOT_PUBLIC_INTERFACE.format("TestInterface"))
     }
 
     @Test fun `WHEN definition interface is private THEN compilation fails`() {
@@ -76,7 +76,7 @@ class AutoBuilderProcessorTests {
         assertThat(compilationResult.exitCode)
             .isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
         assertThat(compilationResult.messages)
-            .contains(AutoBuilderErrors.NOT_PUBLIC_INTERFACE)
+            .contains(AutoBuilderErrors.TEMPLATE_NOT_PUBLIC_INTERFACE.format("TestInterface"))
     }
 
     @Test fun `WHEN definition interface is empty THEN compilation fails`() {
@@ -97,7 +97,7 @@ class AutoBuilderProcessorTests {
         assertThat(compilationResult.exitCode)
             .isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
         assertThat(compilationResult.messages)
-            .contains(AutoBuilderErrors.EMPTY_INTERFACE)
+            .contains(AutoBuilderErrors.TEMPLATE_EMPTY_INTERFACE.format("TestInterface"))
     }
     // endregion
 
@@ -123,7 +123,7 @@ class AutoBuilderProcessorTests {
 
     @Test fun `validate output files`() {
         // Given
-        val code = readFile("TestInterface.kt")
+        val code = readFile("FullModel.kt")
 
         // When
         val compilationResult = compile(code)
@@ -134,11 +134,11 @@ class AutoBuilderProcessorTests {
 
         compilationResult.sourcesGeneratedBySymbolProcessor.forEach { file ->
             when (file.name) {
-                "TestInterface.builder.kt" -> {
+                "FullModel.builder.kt" -> {
                     assertThat(file)
                         .hasSameBinaryContentAs(getFile(file.name))
                 }
-                "TestInterface.defaults.kt" -> {
+                "FullModel.defaults.kt" -> {
                     assertThat(file)
                         .hasSameBinaryContentAs(getFile(file.name))
                 }

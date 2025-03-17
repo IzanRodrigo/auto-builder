@@ -3,8 +3,13 @@ import androidx.compose.runtime.Composable
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import app.izantech.plugin.autobuilder.annotation.DefaultValue
 
-@AutoBuilder
-interface TestInterface {
+data class ComplexObject(
+    val string: String = "Default string",
+    val int: Int = 42,
+    val double: Double = 3.1416,
+)
+
+interface NonOptionalProperties {
     val charSequence: CharSequence
     val string: String
     val int: Int
@@ -18,10 +23,21 @@ interface TestInterface {
     val boolean: Boolean
     val array: Array<String>
     val list: List<String>
+
     val complexObject: ComplexObject
+        @DefaultValue get() = ComplexObject()
+
     val generatedObject: ModelWithDefaults
+        @DefaultValue get() = ModelWithDefaults()
+
     val lambda: () -> Unit
+        @DefaultValue get() = {}
+
     val lambdaWithAnnotation: @Composable () -> Unit
+        @DefaultValue get() = {}
+}
+
+interface OptionalProperties {
     val optCharSequence: CharSequence?
     val optString: String?
     val optInt: Int?
@@ -41,11 +57,8 @@ interface TestInterface {
     val optLambdaWithAnnotation: @Composable (() -> Unit)?
 }
 
-data class ComplexObject(
-    val string: String = "Default string",
-    val int: Int = 42,
-    val double: Double = 3.1416,
-)
+@AutoBuilder(inheritedProperties = true)
+interface FullModel : NonOptionalProperties, OptionalProperties
 
 @AutoBuilder
 interface ModelWithDefaults {

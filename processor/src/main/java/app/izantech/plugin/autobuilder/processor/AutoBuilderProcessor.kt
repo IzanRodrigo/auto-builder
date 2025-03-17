@@ -35,7 +35,7 @@ class AutoBuilderProcessor(private val environment: SymbolProcessorEnvironment) 
                 // Check if the definition is a public interface.
                 val isPublicInterface = symbol.classKind == ClassKind.INTERFACE && symbol.isPublic()
                 if (!isPublicInterface) {
-                    environment.logger.error(AutoBuilderErrors.NOT_PUBLIC_INTERFACE, symbol)
+                    environment.logger.error(AutoBuilderErrors.notPublicInterface(symbol), symbol)
                     return@filter false
                 }
                 true

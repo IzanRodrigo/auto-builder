@@ -35,7 +35,7 @@ internal class AutoBuilderClass private constructor(
                 useInherited = modelAnnotation.inheritedProperties,
             )
             if (properties.none()) {
-                error(AutoBuilderErrors.EMPTY_INTERFACE, symbol)
+                error(AutoBuilderErrors.emptyInterface(symbol), symbol)
                 return null
             }
 
@@ -69,7 +69,7 @@ private val KSClassDeclaration.kAnnotations
 private val KSClassDeclaration.autoBuilderAnnotation
     get() = getAnnotationsByType(AutoBuilder::class).first()
 
-context(Resolver)
+context(Resolver, KSPLogger)
 private fun KSClassDeclaration.getProperties(useInherited: Boolean): ModelProperties {
     val properties = when {
         useInherited -> getAllProperties()

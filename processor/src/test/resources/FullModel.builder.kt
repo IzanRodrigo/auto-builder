@@ -31,7 +31,7 @@ import kotlin.apply
 import kotlin.collections.List
 import kotlin.jvm.JvmSynthetic
 
-private class TestInterfaceImpl(
+private class FullModelImpl(
   override val array: Array<String>,
   override val boolean: Boolean,
   override val byte: Byte,
@@ -78,18 +78,18 @@ private class TestInterfaceImpl(
   override val optString: String?,
   override val short: Short,
   override val string: String,
-) : TestInterface {
+) : FullModel {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false
-    other as TestInterfaceImpl
+    other as FullModelImpl
     return this.array.contentEquals(other.array) && this.boolean == other.boolean && this.byte == other.byte && this.char == other.char && this.charSequence == other.charSequence && this.complexObject == other.complexObject && this.double == other.double && this.float == other.float && this.generatedObject == other.generatedObject && this.int == other.int && this.lambda == other.lambda && this.lambdaWithAnnotation == other.lambdaWithAnnotation && this.list == other.list && this.long == other.long && this.number == other.number && this.optArray.contentEquals(other.optArray) && this.optBoolean == other.optBoolean && this.optByte == other.optByte && this.optChar == other.optChar && this.optCharSequence == other.optCharSequence && this.optComplexObject == other.optComplexObject && this.optDouble == other.optDouble && this.optFloat == other.optFloat && this.optGeneratedObject == other.optGeneratedObject && this.optInt == other.optInt && this.optLambda == other.optLambda && this.optLambdaWithAnnotation == other.optLambdaWithAnnotation && this.optList == other.optList && this.optLong == other.optLong && this.optNumber == other.optNumber && this.optShort == other.optShort && this.optString == other.optString && this.short == other.short && this.string == other.string
   }
 
   override fun hashCode(): Int = hash(array, boolean, byte, char, charSequence, complexObject, double, float, generatedObject, int, lambda, lambdaWithAnnotation, list, long, number, optArray, optBoolean, optByte, optChar, optCharSequence, optComplexObject, optDouble, optFloat, optGeneratedObject, optInt, optLambda, optLambdaWithAnnotation, optList, optLong, optNumber, optShort, optString, short, string)
 
   override fun toString(): String = buildString {
-    append("TestInterface(")
+    append("FullModel(")
     append("array=${array.contentToString()}, ")
     append("boolean=$boolean, ")
     append("byte=$byte, ")
@@ -128,34 +128,34 @@ private class TestInterfaceImpl(
   }
 }
 
-public class TestInterfaceBuilder @PublishedApi internal constructor(
-  source: TestInterface? = null,
+public class FullModelBuilder @PublishedApi internal constructor(
+  source: FullModel? = null,
 ) {
-  public var array: Array<String> = source?.array ?: TestInterfaceDefaults.array
+  public var array: Array<String> = source?.array ?: FullModelDefaults.array
     @JvmSynthetic
     set
 
-  public var boolean: Boolean = source?.boolean ?: TestInterfaceDefaults.boolean
+  public var boolean: Boolean = source?.boolean ?: FullModelDefaults.boolean
     @JvmSynthetic
     set
 
-  public var byte: Byte = source?.byte ?: TestInterfaceDefaults.byte
+  public var byte: Byte = source?.byte ?: FullModelDefaults.byte
     @JvmSynthetic
     set
 
-  public var char: Char = source?.char ?: TestInterfaceDefaults.char
+  public var char: Char = source?.char ?: FullModelDefaults.char
     @JvmSynthetic
     set
 
-  public var charSequence: CharSequence = source?.charSequence ?: TestInterfaceDefaults.charSequence
+  public var charSequence: CharSequence = source?.charSequence ?: FullModelDefaults.charSequence
     @JvmSynthetic
     set
 
-  public var complexObject: ComplexObject? = source?.complexObject
+  public var complexObject: ComplexObject = source?.complexObject ?: FullModelDefaults.complexObject
     @JvmSynthetic
     set
 
-  public var double: Double = source?.double ?: TestInterfaceDefaults.double
+  public var double: Double = source?.double ?: FullModelDefaults.double
     @JvmSynthetic
     set
 
@@ -165,65 +165,67 @@ public class TestInterfaceBuilder @PublishedApi internal constructor(
     fromInclusive = true,
     toInclusive = true,
   )
-  public var float: Float = source?.float ?: TestInterfaceDefaults.float
+  public var float: Float = source?.float ?: FullModelDefaults.float
     @JvmSynthetic
     set
 
-  public var generatedObject: ModelWithDefaults? = source?.generatedObject
+  public var generatedObject: ModelWithDefaults =
+      source?.generatedObject ?: FullModelDefaults.generatedObject
     @JvmSynthetic
     set
 
-  public var int: Int = source?.int ?: TestInterfaceDefaults.int
+  public var int: Int = source?.int ?: FullModelDefaults.int
     @JvmSynthetic
     set
 
-  public var lambda: (() -> Unit)? = source?.lambda
+  public var lambda: () -> Unit = source?.lambda ?: FullModelDefaults.lambda
     @JvmSynthetic
     set
 
-  public var lambdaWithAnnotation: @Composable (() -> Unit)? = source?.lambdaWithAnnotation
+  public var lambdaWithAnnotation: @Composable () -> Unit =
+      source?.lambdaWithAnnotation ?: FullModelDefaults.lambdaWithAnnotation
     @JvmSynthetic
     set
 
-  public var list: List<String> = source?.list ?: TestInterfaceDefaults.list
+  public var list: List<String> = source?.list ?: FullModelDefaults.list
     @JvmSynthetic
     set
 
-  public var long: Long = source?.long ?: TestInterfaceDefaults.long
+  public var long: Long = source?.long ?: FullModelDefaults.long
     @JvmSynthetic
     set
 
-  public var number: Number = source?.number ?: TestInterfaceDefaults.number
+  public var number: Number = source?.number ?: FullModelDefaults.number
     @JvmSynthetic
     set
 
-  public var optArray: Array<String>? = source?.optArray ?: TestInterfaceDefaults.optArray
+  public var optArray: Array<String>? = source?.optArray ?: FullModelDefaults.optArray
     @JvmSynthetic
     set
 
-  public var optBoolean: Boolean? = source?.optBoolean ?: TestInterfaceDefaults.optBoolean
+  public var optBoolean: Boolean? = source?.optBoolean ?: FullModelDefaults.optBoolean
     @JvmSynthetic
     set
 
-  public var optByte: Byte? = source?.optByte ?: TestInterfaceDefaults.optByte
+  public var optByte: Byte? = source?.optByte ?: FullModelDefaults.optByte
     @JvmSynthetic
     set
 
-  public var optChar: Char? = source?.optChar ?: TestInterfaceDefaults.optChar
+  public var optChar: Char? = source?.optChar ?: FullModelDefaults.optChar
     @JvmSynthetic
     set
 
   public var optCharSequence: CharSequence? =
-      source?.optCharSequence ?: TestInterfaceDefaults.optCharSequence
+      source?.optCharSequence ?: FullModelDefaults.optCharSequence
     @JvmSynthetic
     set
 
   public var optComplexObject: ComplexObject? =
-      source?.optComplexObject ?: TestInterfaceDefaults.optComplexObject
+      source?.optComplexObject ?: FullModelDefaults.optComplexObject
     @JvmSynthetic
     set
 
-  public var optDouble: Double? = source?.optDouble ?: TestInterfaceDefaults.optDouble
+  public var optDouble: Double? = source?.optDouble ?: FullModelDefaults.optDouble
     @JvmSynthetic
     set
 
@@ -233,163 +235,163 @@ public class TestInterfaceBuilder @PublishedApi internal constructor(
     fromInclusive = true,
     toInclusive = true,
   )
-  public var optFloat: Float? = source?.optFloat ?: TestInterfaceDefaults.optFloat
+  public var optFloat: Float? = source?.optFloat ?: FullModelDefaults.optFloat
     @JvmSynthetic
     set
 
   public var optGeneratedObject: ModelWithDefaults? =
-      source?.optGeneratedObject ?: TestInterfaceDefaults.optGeneratedObject
+      source?.optGeneratedObject ?: FullModelDefaults.optGeneratedObject
     @JvmSynthetic
     set
 
-  public var optInt: Int? = source?.optInt ?: TestInterfaceDefaults.optInt
+  public var optInt: Int? = source?.optInt ?: FullModelDefaults.optInt
     @JvmSynthetic
     set
 
-  public var optLambda: (() -> Unit)? = source?.optLambda ?: TestInterfaceDefaults.optLambda
+  public var optLambda: (() -> Unit)? = source?.optLambda ?: FullModelDefaults.optLambda
     @JvmSynthetic
     set
 
   public var optLambdaWithAnnotation: @Composable (() -> Unit)? =
-      source?.optLambdaWithAnnotation ?: TestInterfaceDefaults.optLambdaWithAnnotation
+      source?.optLambdaWithAnnotation ?: FullModelDefaults.optLambdaWithAnnotation
     @JvmSynthetic
     set
 
-  public var optList: List<String>? = source?.optList ?: TestInterfaceDefaults.optList
+  public var optList: List<String>? = source?.optList ?: FullModelDefaults.optList
     @JvmSynthetic
     set
 
-  public var optLong: Long? = source?.optLong ?: TestInterfaceDefaults.optLong
+  public var optLong: Long? = source?.optLong ?: FullModelDefaults.optLong
     @JvmSynthetic
     set
 
-  public var optNumber: Number? = source?.optNumber ?: TestInterfaceDefaults.optNumber
+  public var optNumber: Number? = source?.optNumber ?: FullModelDefaults.optNumber
     @JvmSynthetic
     set
 
-  public var optShort: Short? = source?.optShort ?: TestInterfaceDefaults.optShort
+  public var optShort: Short? = source?.optShort ?: FullModelDefaults.optShort
     @JvmSynthetic
     set
 
-  public var optString: String? = source?.optString ?: TestInterfaceDefaults.optString
+  public var optString: String? = source?.optString ?: FullModelDefaults.optString
     @JvmSynthetic
     set
 
-  public var short: Short = source?.short ?: TestInterfaceDefaults.short
+  public var short: Short = source?.short ?: FullModelDefaults.short
     @JvmSynthetic
     set
 
-  public var string: String = source?.string ?: TestInterfaceDefaults.string
+  public var string: String = source?.string ?: FullModelDefaults.string
     @JvmSynthetic
     set
 
   @SinceKotlin("99999999.9")
-  public fun setArray(array: Array<String>): TestInterfaceBuilder = apply { this.array = array }
+  public fun setArray(array: Array<String>): FullModelBuilder = apply { this.array = array }
 
   @SinceKotlin("99999999.9")
-  public fun setBoolean(boolean: Boolean): TestInterfaceBuilder = apply { this.boolean = boolean }
+  public fun setBoolean(boolean: Boolean): FullModelBuilder = apply { this.boolean = boolean }
 
   @SinceKotlin("99999999.9")
-  public fun setByte(byte: Byte): TestInterfaceBuilder = apply { this.byte = byte }
+  public fun setByte(byte: Byte): FullModelBuilder = apply { this.byte = byte }
 
   @SinceKotlin("99999999.9")
-  public fun setChar(char: Char): TestInterfaceBuilder = apply { this.char = char }
+  public fun setChar(char: Char): FullModelBuilder = apply { this.char = char }
 
   @SinceKotlin("99999999.9")
-  public fun setCharSequence(charSequence: CharSequence): TestInterfaceBuilder = apply { this.charSequence = charSequence }
+  public fun setCharSequence(charSequence: CharSequence): FullModelBuilder = apply { this.charSequence = charSequence }
 
   @SinceKotlin("99999999.9")
-  public fun setComplexObject(complexObject: ComplexObject): TestInterfaceBuilder = apply { this.complexObject = complexObject }
+  public fun setComplexObject(complexObject: ComplexObject): FullModelBuilder = apply { this.complexObject = complexObject }
 
   @SinceKotlin("99999999.9")
-  public fun setDouble(double: Double): TestInterfaceBuilder = apply { this.double = double }
+  public fun setDouble(double: Double): FullModelBuilder = apply { this.double = double }
 
   @SinceKotlin("99999999.9")
-  public fun setFloat(float: Float): TestInterfaceBuilder = apply { this.float = float }
+  public fun setFloat(float: Float): FullModelBuilder = apply { this.float = float }
 
   @SinceKotlin("99999999.9")
-  public fun setGeneratedObject(generatedObject: ModelWithDefaults): TestInterfaceBuilder = apply { this.generatedObject = generatedObject }
+  public fun setGeneratedObject(generatedObject: ModelWithDefaults): FullModelBuilder = apply { this.generatedObject = generatedObject }
 
   @SinceKotlin("99999999.9")
-  public fun setInt(int: Int): TestInterfaceBuilder = apply { this.int = int }
+  public fun setInt(int: Int): FullModelBuilder = apply { this.int = int }
 
   @SinceKotlin("99999999.9")
-  public fun setLambda(lambda: () -> Unit): TestInterfaceBuilder = apply { this.lambda = lambda }
+  public fun setLambda(lambda: () -> Unit): FullModelBuilder = apply { this.lambda = lambda }
 
   @SinceKotlin("99999999.9")
-  public fun setLambdaWithAnnotation(lambdaWithAnnotation: @Composable () -> Unit): TestInterfaceBuilder = apply { this.lambdaWithAnnotation = lambdaWithAnnotation }
+  public fun setLambdaWithAnnotation(lambdaWithAnnotation: @Composable () -> Unit): FullModelBuilder = apply { this.lambdaWithAnnotation = lambdaWithAnnotation }
 
   @SinceKotlin("99999999.9")
-  public fun setList(list: List<String>): TestInterfaceBuilder = apply { this.list = list }
+  public fun setList(list: List<String>): FullModelBuilder = apply { this.list = list }
 
   @SinceKotlin("99999999.9")
-  public fun setLong(long: Long): TestInterfaceBuilder = apply { this.long = long }
+  public fun setLong(long: Long): FullModelBuilder = apply { this.long = long }
 
   @SinceKotlin("99999999.9")
-  public fun setNumber(number: Number): TestInterfaceBuilder = apply { this.number = number }
+  public fun setNumber(number: Number): FullModelBuilder = apply { this.number = number }
 
   @SinceKotlin("99999999.9")
-  public fun setOptArray(optArray: Array<String>?): TestInterfaceBuilder = apply { this.optArray = optArray }
+  public fun setOptArray(optArray: Array<String>?): FullModelBuilder = apply { this.optArray = optArray }
 
   @SinceKotlin("99999999.9")
-  public fun setOptBoolean(optBoolean: Boolean?): TestInterfaceBuilder = apply { this.optBoolean = optBoolean }
+  public fun setOptBoolean(optBoolean: Boolean?): FullModelBuilder = apply { this.optBoolean = optBoolean }
 
   @SinceKotlin("99999999.9")
-  public fun setOptByte(optByte: Byte?): TestInterfaceBuilder = apply { this.optByte = optByte }
+  public fun setOptByte(optByte: Byte?): FullModelBuilder = apply { this.optByte = optByte }
 
   @SinceKotlin("99999999.9")
-  public fun setOptChar(optChar: Char?): TestInterfaceBuilder = apply { this.optChar = optChar }
+  public fun setOptChar(optChar: Char?): FullModelBuilder = apply { this.optChar = optChar }
 
   @SinceKotlin("99999999.9")
-  public fun setOptCharSequence(optCharSequence: CharSequence?): TestInterfaceBuilder = apply { this.optCharSequence = optCharSequence }
+  public fun setOptCharSequence(optCharSequence: CharSequence?): FullModelBuilder = apply { this.optCharSequence = optCharSequence }
 
   @SinceKotlin("99999999.9")
-  public fun setOptComplexObject(optComplexObject: ComplexObject?): TestInterfaceBuilder = apply { this.optComplexObject = optComplexObject }
+  public fun setOptComplexObject(optComplexObject: ComplexObject?): FullModelBuilder = apply { this.optComplexObject = optComplexObject }
 
   @SinceKotlin("99999999.9")
-  public fun setOptDouble(optDouble: Double?): TestInterfaceBuilder = apply { this.optDouble = optDouble }
+  public fun setOptDouble(optDouble: Double?): FullModelBuilder = apply { this.optDouble = optDouble }
 
   @SinceKotlin("99999999.9")
-  public fun setOptFloat(optFloat: Float?): TestInterfaceBuilder = apply { this.optFloat = optFloat }
+  public fun setOptFloat(optFloat: Float?): FullModelBuilder = apply { this.optFloat = optFloat }
 
   @SinceKotlin("99999999.9")
-  public fun setOptGeneratedObject(optGeneratedObject: ModelWithDefaults?): TestInterfaceBuilder = apply { this.optGeneratedObject = optGeneratedObject }
+  public fun setOptGeneratedObject(optGeneratedObject: ModelWithDefaults?): FullModelBuilder = apply { this.optGeneratedObject = optGeneratedObject }
 
   @SinceKotlin("99999999.9")
-  public fun setOptInt(optInt: Int?): TestInterfaceBuilder = apply { this.optInt = optInt }
+  public fun setOptInt(optInt: Int?): FullModelBuilder = apply { this.optInt = optInt }
 
   @SinceKotlin("99999999.9")
-  public fun setOptLambda(optLambda: (() -> Unit)?): TestInterfaceBuilder = apply { this.optLambda = optLambda }
+  public fun setOptLambda(optLambda: (() -> Unit)?): FullModelBuilder = apply { this.optLambda = optLambda }
 
   @SinceKotlin("99999999.9")
-  public fun setOptLambdaWithAnnotation(optLambdaWithAnnotation: @Composable (() -> Unit)?): TestInterfaceBuilder = apply { this.optLambdaWithAnnotation = optLambdaWithAnnotation }
+  public fun setOptLambdaWithAnnotation(optLambdaWithAnnotation: @Composable (() -> Unit)?): FullModelBuilder = apply { this.optLambdaWithAnnotation = optLambdaWithAnnotation }
 
   @SinceKotlin("99999999.9")
-  public fun setOptList(optList: List<String>?): TestInterfaceBuilder = apply { this.optList = optList }
+  public fun setOptList(optList: List<String>?): FullModelBuilder = apply { this.optList = optList }
 
   @SinceKotlin("99999999.9")
-  public fun setOptLong(optLong: Long?): TestInterfaceBuilder = apply { this.optLong = optLong }
+  public fun setOptLong(optLong: Long?): FullModelBuilder = apply { this.optLong = optLong }
 
   @SinceKotlin("99999999.9")
-  public fun setOptNumber(optNumber: Number?): TestInterfaceBuilder = apply { this.optNumber = optNumber }
+  public fun setOptNumber(optNumber: Number?): FullModelBuilder = apply { this.optNumber = optNumber }
 
   @SinceKotlin("99999999.9")
-  public fun setOptShort(optShort: Short?): TestInterfaceBuilder = apply { this.optShort = optShort }
+  public fun setOptShort(optShort: Short?): FullModelBuilder = apply { this.optShort = optShort }
 
   @SinceKotlin("99999999.9")
-  public fun setOptString(optString: String?): TestInterfaceBuilder = apply { this.optString = optString }
+  public fun setOptString(optString: String?): FullModelBuilder = apply { this.optString = optString }
 
   @SinceKotlin("99999999.9")
-  public fun setShort(short: Short): TestInterfaceBuilder = apply { this.short = short }
+  public fun setShort(short: Short): FullModelBuilder = apply { this.short = short }
 
   @SinceKotlin("99999999.9")
-  public fun setString(string: String): TestInterfaceBuilder = apply { this.string = string }
+  public fun setString(string: String): FullModelBuilder = apply { this.string = string }
 
-  public fun build(): TestInterface = TestInterfaceImpl(array = array, boolean = boolean, byte = byte, char = char, charSequence = charSequence, complexObject = requireNotNull(complexObject), double = double, float = float, generatedObject = requireNotNull(generatedObject), int = int, lambda = requireNotNull(lambda), lambdaWithAnnotation = requireNotNull(lambdaWithAnnotation), list = list, long = long, number = number, optArray = optArray, optBoolean = optBoolean, optByte = optByte, optChar = optChar, optCharSequence = optCharSequence, optComplexObject = optComplexObject, optDouble = optDouble, optFloat = optFloat, optGeneratedObject = optGeneratedObject, optInt = optInt, optLambda = optLambda, optLambdaWithAnnotation = optLambdaWithAnnotation, optList = optList, optLong = optLong, optNumber = optNumber, optShort = optShort, optString = optString, short = short, string = string)
+  public fun build(): FullModel = FullModelImpl(array = array, boolean = boolean, byte = byte, char = char, charSequence = charSequence, complexObject = complexObject, double = double, float = float, generatedObject = generatedObject, int = int, lambda = lambda, lambdaWithAnnotation = lambdaWithAnnotation, list = list, long = long, number = number, optArray = optArray, optBoolean = optBoolean, optByte = optByte, optChar = optChar, optCharSequence = optCharSequence, optComplexObject = optComplexObject, optDouble = optDouble, optFloat = optFloat, optGeneratedObject = optGeneratedObject, optInt = optInt, optLambda = optLambda, optLambdaWithAnnotation = optLambdaWithAnnotation, optList = optList, optLong = optLong, optNumber = optNumber, optShort = optShort, optString = optString, short = short, string = string)
 }
 
 @JvmSynthetic
-public inline fun TestInterface(`init`: TestInterfaceBuilder.() -> Unit = {}): TestInterface = TestInterfaceBuilder().apply(init).build()
+public inline fun FullModel(`init`: FullModelBuilder.() -> Unit = {}): FullModel = FullModelBuilder().apply(init).build()
 
 @JvmSynthetic
-public inline fun TestInterface.copy(`init`: TestInterfaceBuilder.() -> Unit = {}): TestInterface = TestInterfaceBuilder(this).apply(init).build()
+public inline fun FullModel.copy(`init`: FullModelBuilder.() -> Unit = {}): FullModel = FullModelBuilder(this).apply(init).build()

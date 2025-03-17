@@ -4,19 +4,6 @@ import kotlin.Unit;
 
 public class ModelProcessorSampleJava {
     public static void main(String[] args) {
-        // Test equality
-        var eq1 = new EqualityModelBuilder()
-                .setA("Test")
-                .setB(42)
-                .build();
-        var eq2 = new EqualityModelBuilder()
-                .setB(42)
-                .setA("Test")
-                .build();
-        println(eq1);
-        println(eq2);
-        println("eq1 == eq1: " + eq1.equals(eq2) + "\n");
-
         // Test FullModel
         var modelWithDefaults = new ModelWithDefaultsBuilder().build();
         var model = new FullModelBuilder()

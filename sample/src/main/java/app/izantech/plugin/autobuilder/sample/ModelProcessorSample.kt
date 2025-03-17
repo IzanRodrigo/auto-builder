@@ -25,10 +25,18 @@ interface NonOptionalProperties {
     val boolean: Boolean
     val array: Array<String>
     val list: List<String>
+
     val complexObject: ComplexObject
+        @DefaultValue get() = ComplexObject()
+
     val generatedObject: ModelWithDefaults
+        @DefaultValue get() = ModelWithDefaults()
+
     val lambda: () -> Unit
+        @DefaultValue get() = {}
+
     val lambdaWithAnnotation: @Composable () -> Unit
+        @DefaultValue get() = {}
 }
 
 interface OptionalProperties {
@@ -72,34 +80,7 @@ interface ModelWithDefaults {
         @DefaultValue get() = ComplexObject()
 }
 
-@AutoBuilder
-interface EqualityModel {
-    val a: String
-    val b: Int
-}
-
-@AutoBuilder
-interface ModelWithFunctions {
-    val regularFunction: () -> Unit
-    val suspendFunction: suspend () -> Unit
-    val composableFunction: @Composable () -> Unit
-}
-
 fun main() {
-    // Test equality
-    val eq1 = EqualityModel {
-        a = "Test"
-        b = 42
-    }
-    val eq2 = EqualityModel {
-        b = 42
-        a = "Test"
-    }
-    println(eq1)
-    println(eq2)
-    println("eq1 == eq2: ${eq1 == eq2}")
-    println()
-
     // Test FullModel
     val modelWithDefaults = ModelWithDefaults()
     val model = FullModel {
@@ -139,17 +120,5 @@ fun main() {
     }
     println(copy)
     println("model == copy: ${model == copy}")
-    println()
-
-    // Test functions.
-    val modelWithFunctions = ModelWithFunctions {
-        regularFunction = { println("Regular function") }
-        suspendFunction = suspend { println("Suspend function") }
-        composableFunction = @Composable { println("Composable function") }
-    }
-    val modelWithFunctionsCopy = modelWithFunctions.copy()
-    println(modelWithFunctions)
-    println(modelWithFunctionsCopy)
-    println("modelWithFunctions == modelWithFunctionsCopy: ${modelWithFunctions == modelWithFunctionsCopy}")
     println()
 }
