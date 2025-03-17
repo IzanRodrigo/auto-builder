@@ -20,6 +20,9 @@ val user = User {
 val userCopy = user.copy { age = 40 }
 ```
 
+This library is inspired by [Kotlin data classes](https://kotlinlang.org/docs/data-classes.html), but without the binary compatibility issues that those may cause.
+For more information about the motivation behind this library, see [this article](https://jakewharton.com/public-api-challenges-in-kotlin/) from [Jake Wharton](https://jakewharton.com/).
+
 ## Setup
 
 ```kotlin
@@ -100,6 +103,23 @@ interface User {
 NOTE: If you forget to add default values to non-null properties, there will be a compile error:
 
 <img width="532" alt="auto-builder-compilation-error" src="https://github.com/user-attachments/assets/b2a0e5ce-e352-431e-ba84-9af6765d9445" />
+
+## Inferred default values
+When the default value can be inferred from the property type, the `@DefaultValue` annotation is not needed.
+The default values for the following types are inferred:
+- `String`, `CharSequence` ➞ `""`
+- `Byte`, `Int`, `Number`, `Short`, ➞ `0`
+- `Long` ➞ `0L`
+- `Float` ➞ `0.0f`
+- `Double` ➞ `0.0`
+- `Char` ➞ `'0'`
+- `Boolean` ➞ `false`
+- `BigDecimal` ➞ `BigDecimal.ZERO`
+- `BigInteger` ➞ `BigInteger.ZERO`
+- `Array<T>` ➞ `emptyArray<T>()`
+- `List<T>` ➞ `emptyList<T>()`
+
+More types will be added in the future.
 
 ## License
 
