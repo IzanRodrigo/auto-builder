@@ -20,6 +20,7 @@ maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publ
 androidX-annotations = { module = "androidx.annotation:annotation", version.ref = "androidX-annotations" }
 androidX-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose" }
 androidX-compose-runtime = { module = "androidx.compose.runtime:runtime" }
+androidX-compose-ui = { module = "androidx.compose.ui:ui" }
 google-ksp-processor-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 kotlinpoet-lib = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }

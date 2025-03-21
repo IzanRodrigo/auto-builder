@@ -9,7 +9,8 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 internal object AutoBuilderErrors {
     const val TEMPLATE_NOT_PUBLIC_INTERFACE = "The interface '%s' must be a public interface containing at least one property."
     const val TEMPLATE_EMPTY_INTERFACE = "The interface '%s' must contain at least one property."
-    const val TEMPLATE_UNINITIALIZED_PROPERTY = "The property '%s' is not nullable and has no default value."
+    const val TEMPLATE_UNINITIALIZED_PROPERTY = "The property '%s' is not nullable and has no default value. Either mark it as @Lateinit, provide a default value using @DefaultValue, or make it nullable."
+    const val TEMPLATE_UNINITIALIZED_LATEINIT = "The property '%s' is marked as @Lateinit and must be initialized."
 
     fun notPublicInterface(declaration: KSClassDeclaration) = errorMessage(declaration) {
         TEMPLATE_NOT_PUBLIC_INTERFACE.format(declaration.simpleName.asString())
@@ -21,6 +22,10 @@ internal object AutoBuilderErrors {
 
     fun uninitializedProperty(declaration: KSPropertyDeclaration) = errorMessage(declaration) {
         TEMPLATE_UNINITIALIZED_PROPERTY.format(declaration.simpleName.asString())
+    }
+
+    fun uninitializedLateinit(declaration: KSPropertyDeclaration) = errorMessage(declaration) {
+        TEMPLATE_UNINITIALIZED_LATEINIT.format(declaration.simpleName.asString())
     }
 
     private inline fun errorMessage(declaration: KSNode, message: () -> String): String {

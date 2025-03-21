@@ -13,11 +13,12 @@ dependencies {
     testImplementation(libs.androidX.annotations)
     testImplementation(platform(libs.androidX.compose.bom))
     testImplementation(libs.androidX.compose.runtime)
+    testImplementation(libs.androidX.compose.ui)
     testImplementation(libs.test.assertj)
     testImplementation(libs.test.junit5.api)
-    testRuntimeOnly(libs.test.junit5.engine)
     testImplementation(libs.test.processors.core)
     testImplementation(libs.test.processors.ksp)
+    testRuntimeOnly(libs.test.junit5.engine)
 }
 
 // Configure JUnit5

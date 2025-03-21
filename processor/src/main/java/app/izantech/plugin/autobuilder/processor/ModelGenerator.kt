@@ -35,6 +35,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 
 private val SuppressedWarnings = arrayOf(
     "ConstPropertyName",
+    "KotlinRedundantDiagnosticSuppress",
     "MemberVisibilityCanBePrivate",
     "NEWER_VERSION_IN_SINCE_KOTLIN",
     "RedundantNullableReturnType",
@@ -205,13 +206,12 @@ internal class ModelGenerator(
     ) = with(data) {
         val builderProperties = generateBuilderProperties(properties, defaultsMemberName)
         val constructorParameters = builderProperties.joinToString { builderProperty ->
-            // Edge case:
             //  Builder properties can be nullable even if the symbol property is not.
-            //  This may happen when the we can't infer the default value of the symbol property.
-            val symbolProperty = properties
-                .first { it.name == builderProperty.name }
-            if (!symbolProperty.isNullable && builderProperty.type.isNullable) {
-                "${builderProperty.name} = requireNotNull(${builderProperty.name})"
+            //  This may happen when the property is annotated with @Lateinit.
+            val symbolProperty = properties.first { it.name == builderProperty.name }
+            if (symbolProperty.isLateinit) {
+                val errorMessage = AutoBuilderErrors.uninitializedLateinit(symbolProperty.source)
+                "${builderProperty.name} = ${builderProperty.name} ?: throw UninitializedPropertyAccessException(\"$errorMessage\")"
             } else {
                 "${builderProperty.name} = ${builderProperty.name}"
             }

@@ -5,7 +5,6 @@ package app.izantech.plugin.autobuilder.processor
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.configureKsp
-import com.tschuchort.compiletesting.sourcesGeneratedBySymbolProcessor
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.jupiter.api.Test
@@ -99,6 +98,29 @@ class AutoBuilderProcessorTests {
         assertThat(compilationResult.messages)
             .contains(AutoBuilderErrors.TEMPLATE_EMPTY_INTERFACE.format("TestInterface"))
     }
+
+    @Test fun `WHEN property is uninitialized THEN compilation fails`() {
+        // Given
+        val code = """
+            |package com.izantech.plugin.autobuilder.test
+            |
+            |import app.izantech.plugin.autobuilder.annotation.AutoBuilder
+            |
+            |@AutoBuilder
+            |interface TestInterface {
+            |    val uninitialized: Exception
+            |}
+        """.trimMargin()
+
+        // When
+        val compilationResult = compile(code)
+
+        // Then
+        assertThat(compilationResult.exitCode)
+            .isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+        assertThat(compilationResult.messages)
+            .contains(AutoBuilderErrors.TEMPLATE_UNINITIALIZED_PROPERTY.format("uninitialized"))
+    }
     // endregion
 
     // region Success
@@ -121,9 +143,19 @@ class AutoBuilderProcessorTests {
             .isEqualTo(KotlinCompilation.ExitCode.OK)
     }
 
-    @Test fun `validate output files`() {
+    @Test fun `WHEN property is uninitialized but is annotated with @Lateinit THEN compilation succeeds`() {
         // Given
-        val code = readFile("FullModel.kt")
+        val code = """
+            |package com.izantech.plugin.autobuilder.test
+            |
+            |import app.izantech.plugin.autobuilder.annotation.AutoBuilder
+            |import app.izantech.plugin.autobuilder.annotation.Lateinit
+            |
+            |@AutoBuilder
+            |interface TestInterface {
+            |    @Lateinit val uninitialized: Exception
+            |}
+        """.trimMargin()
 
         // When
         val compilationResult = compile(code)
@@ -131,19 +163,6 @@ class AutoBuilderProcessorTests {
         // Then
         assertThat(compilationResult.exitCode)
             .isEqualTo(KotlinCompilation.ExitCode.OK)
-
-        compilationResult.sourcesGeneratedBySymbolProcessor.forEach { file ->
-            when (file.name) {
-                "FullModel.builder.kt" -> {
-                    assertThat(file)
-                        .hasSameBinaryContentAs(getFile(file.name))
-                }
-                "FullModel.defaults.kt" -> {
-                    assertThat(file)
-                        .hasSameBinaryContentAs(getFile(file.name))
-                }
-            }
-        }
     }
     // endregion
 

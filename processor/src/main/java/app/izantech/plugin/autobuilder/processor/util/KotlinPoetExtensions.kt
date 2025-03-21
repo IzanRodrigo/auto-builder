@@ -1,12 +1,9 @@
-@file:OptIn(DelicateKotlinPoetApi::class)
-
 package app.izantech.plugin.autobuilder.processor.util
 
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSFile
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec

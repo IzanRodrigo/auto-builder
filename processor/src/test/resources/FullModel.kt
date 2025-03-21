@@ -2,6 +2,7 @@ import androidx.annotation.FloatRange
 import androidx.compose.runtime.Composable
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import app.izantech.plugin.autobuilder.annotation.DefaultValue
+import app.izantech.plugin.autobuilder.annotation.Lateinit
 
 data class ComplexObject(
     val string: String = "Default string",
@@ -23,6 +24,8 @@ interface NonOptionalProperties {
     val boolean: Boolean
     val array: Array<String>
     val list: List<String>
+
+    @Lateinit val lateinitProperty: ComplexObject
 
     val complexObject: ComplexObject
         @DefaultValue get() = ComplexObject()

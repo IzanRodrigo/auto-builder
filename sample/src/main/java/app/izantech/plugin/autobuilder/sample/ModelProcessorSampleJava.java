@@ -1,5 +1,8 @@
 package app.izantech.plugin.autobuilder.sample;
 
+import app.izantech.plugin.autobuilder.sample.model.ComplexObject;
+import app.izantech.plugin.autobuilder.sample.model.FullModelBuilder;
+import app.izantech.plugin.autobuilder.sample.model.ModelWithDefaultsBuilder;
 import kotlin.Unit;
 
 public class ModelProcessorSampleJava {
@@ -10,7 +13,7 @@ public class ModelProcessorSampleJava {
                 .setString("Hello, World!")
                 .setInt(42)
                 .setDouble(3.14)
-                .setComplexObject(new ComplexObject("Complex object", 123, 2.718))
+                .setLateinitProperty(new ComplexObject("Complex object", 123, 2.718))
                 .setGeneratedObject(modelWithDefaults)
                 .setLambda(() -> {
                     println("Lambda");

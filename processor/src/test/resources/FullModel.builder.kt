@@ -1,5 +1,6 @@
 @file:Suppress(
 	"ConstPropertyName",
+	"KotlinRedundantDiagnosticSuppress",
 	"MemberVisibilityCanBePrivate",
 	"NEWER_VERSION_IN_SINCE_KOTLIN",
 	"RedundantNullableReturnType",
@@ -50,6 +51,7 @@ private class FullModelImpl(
   override val int: Int,
   override val lambda: () -> Unit,
   override val lambdaWithAnnotation: @Composable () -> Unit,
+  override val lateinitProperty: ComplexObject,
   override val list: List<String>,
   override val long: Long,
   override val number: Number,
@@ -83,10 +85,10 @@ private class FullModelImpl(
     if (this === other) return true
     if (javaClass != other?.javaClass) return false
     other as FullModelImpl
-    return this.array.contentEquals(other.array) && this.boolean == other.boolean && this.byte == other.byte && this.char == other.char && this.charSequence == other.charSequence && this.complexObject == other.complexObject && this.double == other.double && this.float == other.float && this.generatedObject == other.generatedObject && this.int == other.int && this.lambda == other.lambda && this.lambdaWithAnnotation == other.lambdaWithAnnotation && this.list == other.list && this.long == other.long && this.number == other.number && this.optArray.contentEquals(other.optArray) && this.optBoolean == other.optBoolean && this.optByte == other.optByte && this.optChar == other.optChar && this.optCharSequence == other.optCharSequence && this.optComplexObject == other.optComplexObject && this.optDouble == other.optDouble && this.optFloat == other.optFloat && this.optGeneratedObject == other.optGeneratedObject && this.optInt == other.optInt && this.optLambda == other.optLambda && this.optLambdaWithAnnotation == other.optLambdaWithAnnotation && this.optList == other.optList && this.optLong == other.optLong && this.optNumber == other.optNumber && this.optShort == other.optShort && this.optString == other.optString && this.short == other.short && this.string == other.string
+    return this.array.contentEquals(other.array) && this.boolean == other.boolean && this.byte == other.byte && this.char == other.char && this.charSequence == other.charSequence && this.complexObject == other.complexObject && this.double == other.double && this.float == other.float && this.generatedObject == other.generatedObject && this.int == other.int && this.lambda == other.lambda && this.lambdaWithAnnotation == other.lambdaWithAnnotation && this.lateinitProperty == other.lateinitProperty && this.list == other.list && this.long == other.long && this.number == other.number && this.optArray.contentEquals(other.optArray) && this.optBoolean == other.optBoolean && this.optByte == other.optByte && this.optChar == other.optChar && this.optCharSequence == other.optCharSequence && this.optComplexObject == other.optComplexObject && this.optDouble == other.optDouble && this.optFloat == other.optFloat && this.optGeneratedObject == other.optGeneratedObject && this.optInt == other.optInt && this.optLambda == other.optLambda && this.optLambdaWithAnnotation == other.optLambdaWithAnnotation && this.optList == other.optList && this.optLong == other.optLong && this.optNumber == other.optNumber && this.optShort == other.optShort && this.optString == other.optString && this.short == other.short && this.string == other.string
   }
 
-  override fun hashCode(): Int = hash(array, boolean, byte, char, charSequence, complexObject, double, float, generatedObject, int, lambda, lambdaWithAnnotation, list, long, number, optArray, optBoolean, optByte, optChar, optCharSequence, optComplexObject, optDouble, optFloat, optGeneratedObject, optInt, optLambda, optLambdaWithAnnotation, optList, optLong, optNumber, optShort, optString, short, string)
+  override fun hashCode(): Int = hash(array, boolean, byte, char, charSequence, complexObject, double, float, generatedObject, int, lambda, lambdaWithAnnotation, lateinitProperty, list, long, number, optArray, optBoolean, optByte, optChar, optCharSequence, optComplexObject, optDouble, optFloat, optGeneratedObject, optInt, optLambda, optLambdaWithAnnotation, optList, optLong, optNumber, optShort, optString, short, string)
 
   override fun toString(): String = buildString {
     append("FullModel(")
@@ -102,6 +104,7 @@ private class FullModelImpl(
     append("int=$int, ")
     append("lambda=$lambda, ")
     append("lambdaWithAnnotation=$lambdaWithAnnotation, ")
+    append("lateinitProperty=$lateinitProperty, ")
     append("list=$list, ")
     append("long=$long, ")
     append("number=$number, ")
@@ -184,6 +187,10 @@ public class FullModelBuilder @PublishedApi internal constructor(
 
   public var lambdaWithAnnotation: @Composable () -> Unit =
       source?.lambdaWithAnnotation ?: FullModelDefaults.lambdaWithAnnotation
+    @JvmSynthetic
+    set
+
+  public var lateinitProperty: ComplexObject? = source?.lateinitProperty
     @JvmSynthetic
     set
 
@@ -322,6 +329,9 @@ public class FullModelBuilder @PublishedApi internal constructor(
   public fun setLambdaWithAnnotation(lambdaWithAnnotation: @Composable () -> Unit): FullModelBuilder = apply { this.lambdaWithAnnotation = lambdaWithAnnotation }
 
   @SinceKotlin("99999999.9")
+  public fun setLateinitProperty(lateinitProperty: ComplexObject): FullModelBuilder = apply { this.lateinitProperty = lateinitProperty }
+
+  @SinceKotlin("99999999.9")
   public fun setList(list: List<String>): FullModelBuilder = apply { this.list = list }
 
   @SinceKotlin("99999999.9")
@@ -387,7 +397,7 @@ public class FullModelBuilder @PublishedApi internal constructor(
   @SinceKotlin("99999999.9")
   public fun setString(string: String): FullModelBuilder = apply { this.string = string }
 
-  public fun build(): FullModel = FullModelImpl(array = array, boolean = boolean, byte = byte, char = char, charSequence = charSequence, complexObject = complexObject, double = double, float = float, generatedObject = generatedObject, int = int, lambda = lambda, lambdaWithAnnotation = lambdaWithAnnotation, list = list, long = long, number = number, optArray = optArray, optBoolean = optBoolean, optByte = optByte, optChar = optChar, optCharSequence = optCharSequence, optComplexObject = optComplexObject, optDouble = optDouble, optFloat = optFloat, optGeneratedObject = optGeneratedObject, optInt = optInt, optLambda = optLambda, optLambdaWithAnnotation = optLambdaWithAnnotation, optList = optList, optLong = optLong, optNumber = optNumber, optShort = optShort, optString = optString, short = short, string = string)
+  public fun build(): FullModel = FullModelImpl(array = array, boolean = boolean, byte = byte, char = char, charSequence = charSequence, complexObject = complexObject, double = double, float = float, generatedObject = generatedObject, int = int, lambda = lambda, lambdaWithAnnotation = lambdaWithAnnotation, lateinitProperty = lateinitProperty ?: throw UninitializedPropertyAccessException("/Users/x497413/Dev/Projects/auto-builder/sample/src/main/java/TestInterface.kt:28: The property 'lateinitProperty' is marked as @Lateinit and must be initialized."), list = list, long = long, number = number, optArray = optArray, optBoolean = optBoolean, optByte = optByte, optChar = optChar, optCharSequence = optCharSequence, optComplexObject = optComplexObject, optDouble = optDouble, optFloat = optFloat, optGeneratedObject = optGeneratedObject, optInt = optInt, optLambda = optLambda, optLambdaWithAnnotation = optLambdaWithAnnotation, optList = optList, optLong = optLong, optNumber = optNumber, optShort = optShort, optString = optString, short = short, string = string)
 }
 
 @JvmSynthetic

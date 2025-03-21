@@ -1,6 +1,7 @@
 package app.izantech.plugin.autobuilder.processor.model
 
 import app.izantech.plugin.autobuilder.annotation.DefaultValue
+import app.izantech.plugin.autobuilder.annotation.Lateinit
 import app.izantech.plugin.autobuilder.processor.AutoBuilderErrors
 import app.izantech.plugin.autobuilder.processor.util.annotationOrNull
 import app.izantech.plugin.autobuilder.processor.util.defaultValueOrNull
@@ -23,6 +24,8 @@ internal class AutoBuilderProperty private constructor(
     val hasCustomDefaultValue: Boolean,
     val resolvedType: KSType,
     val defaultValue: String?,
+    val isLateinit: Boolean,
+    val source: KSPropertyDeclaration,
 ): Comparable<AutoBuilderProperty> {
     companion object {
         context(Resolver, KSPLogger)
@@ -31,8 +34,9 @@ internal class AutoBuilderProperty private constructor(
 
             val resolvedType = declaration.type.resolve()
             val defaultValue = resolvedType.defaultValueOrNull
+            val isLateinit = declaration.annotationOrNull<Lateinit>() != null
             val hasCustomDefaultValue = declaration.getter?.annotationOrNull<DefaultValue>() != null
-            if (!resolvedType.isMarkedNullable && defaultValue == null && !hasCustomDefaultValue) {
+            if (!isLateinit && !resolvedType.isMarkedNullable && defaultValue == null && !hasCustomDefaultValue) {
                 error(AutoBuilderErrors.uninitializedProperty(declaration), declaration)
                 return null
             }
@@ -45,6 +49,8 @@ internal class AutoBuilderProperty private constructor(
                 hasCustomDefaultValue = hasCustomDefaultValue,
                 resolvedType = resolvedType,
                 defaultValue = defaultValue,
+                isLateinit = isLateinit,
+                source = declaration,
             )
         }
     }

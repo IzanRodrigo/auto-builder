@@ -15,3 +15,11 @@ annotation class AutoBuilder(
  */
 @Target(AnnotationTarget.PROPERTY_GETTER)
 annotation class DefaultValue
+
+
+/**
+ * This annotation is used to specify a property as mandatory when generating a builder class.
+ * That means the property must be initialized before the builder is built or an exception will be thrown.
+ */
+@Target(AnnotationTarget.PROPERTY)
+annotation class Lateinit

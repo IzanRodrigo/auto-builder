@@ -76,7 +76,7 @@ That object can be copied or mutated using the `copy` method:
 val userCopy = user.copy { age = 40 }
 ```
 
-**Java** 
+**Java**
 
 In `Java` the `copy` method is not available, but we can create a new builder reusing the previous user data:
 
@@ -102,7 +102,28 @@ interface User {
 
 NOTE: If you forget to add default values to non-null properties, there will be a compile error:
 
-<img width="532" alt="auto-builder-compilation-error" src="https://github.com/user-attachments/assets/b2a0e5ce-e352-431e-ba84-9af6765d9445" />
+<img width="600" alt="auto-builder-compilation-error" src="https://github.com/user-attachments/assets/b2a0e5ce-e352-431e-ba84-9af6765d9445" />
+
+### `@Lateinit`
+However, there are instances where the property is not meant to be nullable nor have a default value.
+In those cases, we can use the `@Lateinit` annotation:
+
+```kotlin
+data class Credentials(val username: String, val password: String)
+
+@AutoBuilder
+interface User {
+    // Other properties...
+
+    @Lateinit val credentials: Credentials
+}
+```
+
+In this case, the `credentials` property will be required when building the `User` object.
+
+NOTE: If you forget to set a value to a `@Lateinit` property, there will be a runtime error:
+
+<img width="600" alt="auto-builder-runtime-error" src="https://github.com/user-attachments/assets/adc6b01b-21ee-4d92-8835-849818ae5fc6" />
 
 ## Inferred default values
 When the default value can be inferred from the property type, the `@DefaultValue` annotation is not needed.
@@ -118,6 +139,17 @@ The default values for the following types are inferred:
 - `BigInteger` ➞ `BigInteger.ZERO`
 - `Array<T>` ➞ `emptyArray<T>()`
 - `List<T>` ➞ `emptyList<T>()`
+- `Set<T>` ➞ `emptySet<T>()`
+- `Map<K, V>` ➞ `emptyMap<K, V>()`
+- `IntArray` -> `intArrayOf()`
+- `LongArray` -> `longArrayOf()`
+- `FloatArray` -> `floatArrayOf()`
+- `DoubleArray` -> `doubleArrayOf()`
+- `BooleanArray` -> `booleanArrayOf()`
+- `ByteArray` -> `byteArrayOf()`
+- `ShortArray` -> `shortArrayOf()`
+- `CharArray` -> `charArrayOf()`
+- `AnnotatedString` ➞ `AnnotatedString("")`
 
 More types will be added in the future.
 

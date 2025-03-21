@@ -8,6 +8,7 @@ import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -24,8 +25,24 @@ internal val KSType.isPrimitive
             this == builtIns.booleanType
 
 context(Resolver)
-internal val KSType.isArray
-    get() = starProjection().isAssignableFrom(builtIns.arrayType)
+internal val KSType.isArray: Boolean
+    get() {
+        if (starProjection().isAssignableFrom(builtIns.arrayType)) {
+            return true
+        }
+
+        return makeNotNullable().run {
+            instanceOf<IntArray>()
+                    || instanceOf<FloatArray>()
+                    || instanceOf<DoubleArray>()
+                    || instanceOf<LongArray>()
+                    || instanceOf<ShortArray>()
+                    || instanceOf<ByteArray>()
+                    || instanceOf<BooleanArray>()
+                    || instanceOf<CharArray>()
+        }
+    }
+
 
 context(Resolver)
 internal val KSType.isString
@@ -44,16 +61,26 @@ internal val KSType.defaultValueOrNull
         builtIns.longType -> "0L"
         builtIns.floatType -> "0f"
         builtIns.doubleType -> "0.0"
-        builtIns.charType -> "'0'"
+        builtIns.charType -> "'\u0000'"
         builtIns.booleanType -> "false"
         builtIns.stringType -> "\"\""
-        builtIns.iterableType -> "emptyList()"
         builtIns.arrayType -> "emptyArray()"
         else -> when {
             builtIns.arrayType.isAssignableFrom(projection) -> "emptyArray()"
-            builtIns.iterableType.isAssignableFrom(projection) -> "emptyList()"
+            projection.instanceOf<List<*>>() -> "emptyList()"
+            projection.instanceOf<Set<*>>() -> "emptySet()"
+            projection.instanceOf<Map<*, *>>() -> "emptyMap()"
+            projection.instanceOf<IntArray>() -> "intArrayOf()"
+            projection.instanceOf<FloatArray>() -> "floatArrayOf()"
+            projection.instanceOf<DoubleArray>() -> "doubleArrayOf()"
+            projection.instanceOf<LongArray>() -> "longArrayOf()"
+            projection.instanceOf<ShortArray>() -> "shortArrayOf()"
+            projection.instanceOf<ByteArray>() -> "byteArrayOf()"
+            projection.instanceOf<BooleanArray>() -> "booleanArrayOf()"
+            projection.instanceOf<CharArray>() -> "charArrayOf()"
             projection.instanceOf<BigDecimal>() -> "BigDecimal.ZERO"
             projection.instanceOf<BigInteger>() -> "BigInteger.ZERO"
+            projection.instanceOf("androidx.compose.ui.text.AnnotatedString") -> "AnnotatedString(\"\")"
             projection.instanceOf<CharSequence>() -> "\"\""
             projection.isMarkedNullable -> "null"
             else -> null
@@ -61,8 +88,16 @@ internal val KSType.defaultValueOrNull
     }
 
 context(Resolver)
+internal fun KSType.instanceOf(name: String) =
+    instanceOf(getClassDeclarationByName(name))
+
+context(Resolver)
 internal inline fun <reified T> KSType.instanceOf() =
-    getClassDeclarationByName<T>()?.asStarProjectedType()?.isAssignableFrom(this) == true
+    instanceOf(getClassDeclarationByName<T>())
+
+context(Resolver)
+internal fun KSType.instanceOf(declaration: KSClassDeclaration?) =
+    declaration?.asStarProjectedType()?.isAssignableFrom(this) == true
 
 context(Resolver)
 internal inline fun <reified T> KSAnnotation.instanceOf() =

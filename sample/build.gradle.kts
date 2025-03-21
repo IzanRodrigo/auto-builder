@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.androidX.annotations)
     implementation(platform(libs.androidX.compose.bom))
     implementation(libs.androidX.compose.runtime)
+    implementation(libs.androidX.compose.ui)
     ksp(projects.processor)
 }
 
