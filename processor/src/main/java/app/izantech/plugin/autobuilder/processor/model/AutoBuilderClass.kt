@@ -13,6 +13,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.ksp.toClassName
 
 internal class AutoBuilderClass private constructor(
     val packageName: String,
@@ -40,8 +41,8 @@ internal class AutoBuilderClass private constructor(
             }
 
             val packageName = symbol.packageName.asString()
-            val name = symbol.simpleName.asString()
-            val className = ClassName(packageName, name)
+            val className = symbol.toClassName()
+            val name = className.simpleNames.joinToString(separator = "_")
             val defaultsClassName = ClassName(packageName, "${name}Defaults")
             val defaultsMemberName = MemberName(packageName, defaultsClassName.simpleName)
             val implClassName = ClassName(packageName, "${name}Impl")

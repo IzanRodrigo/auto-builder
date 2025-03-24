@@ -4,9 +4,9 @@ import java.util.Locale
 
 internal fun <T> Iterable<T>.prettyPrint(transform: (T) -> String = { it.toString() }) =
     joinToString(
-        prefix = "\n\t\t",
-        separator = "\n\t\t",
-        postfix = "\n\t",
+        prefix = "\n    ",
+        separator = "\n    ",
+        postfix = "\n  ",
         transform = transform,
     )
 

@@ -166,7 +166,7 @@ internal class ModelGenerator(
         return FunSpec.builder("hashCode")
             .addModifiers(KModifier.OVERRIDE)
             .returns(Int::class)
-            .addStatement("return %M(%L)", javaHash, args)
+            .addStatement("return \n  %M(%L)", javaHash, args)
             .build()
     }
 
@@ -175,7 +175,7 @@ internal class ModelGenerator(
         className: ClassName,
     ) = with(resolver) {
         val args = buildList {
-            add("append(\"${className.simpleName}(\")")
+            add("append(\"${className.simpleNames.joinToString(separator = ".")}(\")")
             addAll(properties.mapIndexed { index, it ->
                 val content = if (it.resolvedType.isArray) {
                     "{${it.name}.contentToString()}"
@@ -235,7 +235,7 @@ internal class ModelGenerator(
             .addFunction(
                 FunSpec.builder("build")
                     .returns(className)
-                    .addStatement("return \n\t%T(%L)", implClassName, constructorParameters)
+                    .addStatement("return \n  %T(%L)", implClassName, constructorParameters)
                     .build()
             )
             .addOptionalOriginatingKSFile(originatingFile)
@@ -292,7 +292,7 @@ internal class ModelGenerator(
             .defaultValue("%L", "{}")
             .build()
 
-        val initializerFunction = FunSpec.builder(className.simpleName)
+        val initializerFunction = FunSpec.builder(name)
             .addAnnotation(JvmSynthetic::class)
             .addModifiers(KModifier.INLINE)
             .addParameter(initLambdaParameter)

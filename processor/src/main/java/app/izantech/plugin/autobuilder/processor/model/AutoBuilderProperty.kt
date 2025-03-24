@@ -55,9 +55,6 @@ internal class AutoBuilderProperty private constructor(
         }
     }
 
-    val isNullable: Boolean
-        get() = typeName.isNullable
-
     override fun compareTo(other: AutoBuilderProperty): Int {
         return name.compareTo(other.name)
     }
