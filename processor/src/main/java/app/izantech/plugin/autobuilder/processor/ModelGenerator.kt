@@ -253,7 +253,16 @@ internal class ModelGenerator(
             .mutable()
             .let {
                 if (!isLateinit && hasDefaultValue) {
-                    it.initializer("source?.%L ?: %M.${property.name}", property.name, defaultsMemberName)
+                    val code = buildString {
+                        if (property.typeName.isNullable) {
+                            append("if (source != null) source.%L else ")
+                        } else {
+                            append("source?.%L ?: ")
+                        }
+                        append("%M.")
+                        append(property.name)
+                    }
+                    it.initializer(code, property.name, defaultsMemberName)
                 } else {
                     it.initializer("source?.%L", property.name)
                 }
