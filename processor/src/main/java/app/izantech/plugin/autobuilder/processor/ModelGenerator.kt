@@ -251,6 +251,9 @@ internal class ModelGenerator(
         val typeName = property.typeName.runIf(isLateinit || !hasDefaultValue) { copy(nullable = true) }
         PropertySpec.builder(property.name, typeName)
             .mutable()
+            .runIf(property.useBuilderSetter) {
+                addModifiers(KModifier.PRIVATE)
+            }
             .let {
                 if (!isLateinit && hasDefaultValue) {
                     val code = buildString {
@@ -279,7 +282,9 @@ internal class ModelGenerator(
         return properties.map { property ->
             FunSpec.builder("set${property.name.capitalizeCompat()}")
                 .addParameter(property.name, property.typeName)
-                .addAnnotation(hideFromKotlinAnnotation())
+                .runIf(!property.useBuilderSetter) {
+                    addAnnotation(hideFromKotlinAnnotation())
+                }
                 .addStatement(
                     "return %M { this.${property.name} = ${property.name} }",
                     MemberName("kotlin", "apply")
@@ -302,6 +307,7 @@ internal class ModelGenerator(
             .build()
 
         val initializerFunction = FunSpec.builder(name)
+            .addKdoc("@see %T", className)
             .addAnnotation(JvmSynthetic::class)
             .addModifiers(KModifier.INLINE)
             .addParameter(initLambdaParameter)
@@ -315,6 +321,7 @@ internal class ModelGenerator(
 
         val copyFunction = FunSpec.builder("copy")
             .receiver(className)
+            .addKdoc("@see %T", className)
             .addAnnotation(JvmSynthetic::class)
             .addModifiers(KModifier.INLINE)
             .addParameter(initLambdaParameter)
