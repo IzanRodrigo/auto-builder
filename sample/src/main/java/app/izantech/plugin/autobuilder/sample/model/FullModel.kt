@@ -6,6 +6,7 @@ import androidx.compose.ui.text.AnnotatedString
 import app.izantech.plugin.autobuilder.annotation.AutoBuilder
 import app.izantech.plugin.autobuilder.annotation.DefaultValue
 import app.izantech.plugin.autobuilder.annotation.Lateinit
+import app.izantech.plugin.autobuilder.annotation.UseBuilderSetter
 
 data class ComplexObject(
     val string: String = "Default string",
@@ -64,6 +65,9 @@ interface NonOptionalProperties {
 
     val lambdaWithAnnotation: @Composable () -> Unit
         @DefaultValue get() = {}
+
+    @UseBuilderSetter val onClick: () -> Unit
+        @DefaultValue get() = {}
 }
 
 interface OptionalProperties {
@@ -89,5 +93,10 @@ interface OptionalProperties {
     val optLambdaWithAnnotation: @Composable (() -> Unit)?
 }
 
+/**
+ * This is a sample model class to test the AutoBuilder annotation processor.
+ * It contains various properties, including optional and non-optional ones,
+ * inherited from [NonOptionalProperties], [OptionalProperties] and [ArrayProperties].
+ */
 @AutoBuilder(inheritedProperties = true)
 interface FullModel : NonOptionalProperties, OptionalProperties, ArrayProperties

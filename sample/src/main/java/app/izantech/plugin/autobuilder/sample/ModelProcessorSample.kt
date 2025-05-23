@@ -21,6 +21,7 @@ fun main() {
         generatedObject = modelWithDefaults
         lambda = { println("Lambda") }
         lambdaWithAnnotation = @Composable { println("Lambda with annotation") }
+        setOnClick { println("Clicked!") }
     }
     val sameModel = model.copy()
     println(model)
