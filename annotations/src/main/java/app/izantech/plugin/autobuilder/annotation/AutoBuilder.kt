@@ -24,7 +24,7 @@ annotation class DefaultValue
 annotation class Lateinit
 
 /**
- * This annotation is used to use the builder setter instead of the property itself.
+ * This annotation is used to force the use of the builder setter instead of the property itself.
  */
 @Target(AnnotationTarget.PROPERTY)
 annotation class UseBuilderSetter
