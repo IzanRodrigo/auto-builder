@@ -125,6 +125,29 @@ NOTE: If you forget to set a value to a `@Lateinit` property, there will be a ru
 
 <img width="600" alt="auto-builder-runtime-error" src="https://github.com/user-attachments/assets/adc6b01b-21ee-4d92-8835-849818ae5fc6" />
 
+### `@UseBuilderSetter`
+
+This annotation is used to force the use of the builder setter instead of the property itself.
+
+```kotlin
+@AutoBuilder
+interface Interaction {
+    // Other properties...
+
+    @UseBuilderSetter
+    val onClick: () -> Unit
+        @DefaultValue get() = {}
+}
+
+// Later in the code...
+
+val interaction = Interaction {
+    onClick = {} // This will throw an error!!!
+
+    setOnClick { println("Clicked!") } // This will work.
+}
+```
+
 ## Inferred default values
 When the default value can be inferred from the property type, the `@DefaultValue` annotation is not needed.
 The default values for the following types are inferred:
