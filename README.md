@@ -156,7 +156,7 @@ The default values for the following types are inferred:
 - `Long` ➞ `0L`
 - `Float` ➞ `0.0f`
 - `Double` ➞ `0.0`
-- `Char` ➞ `'0'`
+- `Char` ➞ `'' // NULL char`
 - `Boolean` ➞ `false`
 - `BigDecimal` ➞ `BigDecimal.ZERO`
 - `BigInteger` ➞ `BigInteger.ZERO`
